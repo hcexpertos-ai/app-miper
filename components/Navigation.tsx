@@ -1,0 +1,98 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { useAuthStore } from '../src/store/auth-store'
+
+const NAV = [
+  { href: '/',              icon: '📊', label: 'Dashboard'    },
+  { href: '/levantamiento', icon: '📋', label: 'Levantamiento' },
+  { href: '/miper',         icon: '⚠️',  label: 'MIPER'        },
+  { href: '/programa',      icon: '📅', label: 'Programa'      },
+  { href: '/informes',      icon: '📄', label: 'Informes'      },
+]
+
+export default function Navigation() {
+  const path    = usePathname()
+  const router  = useRouter()
+  const user    = useAuthStore(s => s.user)
+  const signOut = useAuthStore(s => s.signOut)
+
+  // No mostrar navegación en la pantalla de autenticación
+  if (path === '/auth') return null
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.replace('/auth')
+  }
+
+  return (
+    <>
+      {/* ── Sidebar desktop ─────────────────────────────────────────────── */}
+      <aside className="hidden md:flex w-60 shrink-0 bg-[#1e3a5f] text-white flex-col">
+        {/* Logo */}
+        <div className="px-6 py-6 border-b border-white/20">
+          <div className="text-xl font-bold tracking-tight">App MIPER</div>
+          <div className="text-[11px] text-white/50 mt-0.5">DS 44 · Ley 16.744</div>
+        </div>
+
+        {/* Links */}
+        <nav className="flex-1 px-3 py-4 space-y-0.5">
+          {NAV.map(({ href, icon, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                path === href
+                  ? 'bg-white/20 text-white'
+                  : 'text-white/65 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <span className="text-base">{icon}</span>
+              {label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Usuario + cerrar sesión */}
+        <div className="px-4 py-4 border-t border-white/10 space-y-2">
+          {user && (
+            <p className="text-[11px] text-white/40 truncate px-1">{user.email}</p>
+          )}
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white/65
+                       hover:bg-white/10 hover:text-white transition-colors"
+          >
+            <span>🚪</span> Cerrar sesión
+          </button>
+          <p className="text-[10px] text-white/25 px-1">Rev. 01 · 2026 · DS 44</p>
+        </div>
+      </aside>
+
+      {/* ── Bottom nav móvil ────────────────────────────────────────────── */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-[#1e3a5f] text-white flex z-50
+                      border-t border-white/10 safe-area-inset-bottom">
+        {NAV.map(({ href, icon, label }) => (
+          <Link
+            key={href}
+            href={href}
+            className={`flex-1 flex flex-col items-center gap-0.5 py-3 transition-colors ${
+              path === href ? 'text-white' : 'text-white/55'
+            }`}
+          >
+            <span className="text-xl leading-none">{icon}</span>
+            <span className="text-[10px] font-medium">{label}</span>
+          </Link>
+        ))}
+        <button
+          onClick={handleSignOut}
+          className="flex-1 flex flex-col items-center gap-0.5 py-3 text-white/55"
+        >
+          <span className="text-xl leading-none">🚪</span>
+          <span className="text-[10px] font-medium">Salir</span>
+        </button>
+      </nav>
+    </>
+  )
+}

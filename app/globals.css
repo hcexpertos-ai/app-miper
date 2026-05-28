@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  body { @apply bg-slate-50 text-slate-900 antialiased; }
+
+  input, select, textarea {
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-0;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-[#1e3a5f] text-white text-sm font-medium rounded-lg hover:bg-[#162d4a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-white text-slate-700 text-sm font-medium rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors;
+  }
+  .btn-danger {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 text-sm font-medium rounded-lg hover:bg-red-100 transition-colors;
+  }
+  .input {
+    @apply w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white placeholder:text-slate-400;
+  }
+  .select {
+    @apply w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white;
+  }
+  .label {
+    @apply block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1;
+  }
+  .card {
+    @apply bg-white rounded-xl border border-slate-200 shadow-sm;
+  }
+  .section-header {
+    @apply flex items-center justify-between px-5 py-4 border-b border-slate-100;
+  }
+  .table-th {
+    @apply px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wide;
+  }
+  .table-td {
+    @apply px-4 py-3 text-sm text-slate-700;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   ESTILOS DE IMPRESIÓN — Módulo Informes
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+@media print {
+  /* Ocultar toda la UI de navegación */
+  aside,
+  nav,
+  .no-print,
+  [data-no-print] {
+    display: none !important;
+  }
+
+  /* El main ocupa toda la página */
+  body, html { background: white !important; }
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  /* El layout flex deja de ser flex */
+  .flex.h-screen {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Resetear shadows y bordes del documento */
+  .report-doc {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Evitar corte dentro de filas de tabla */
+  tr, .no-break { break-inside: avoid !important; }
+
+  /* Salto de página explícito */
+  .page-break { break-before: page !important; }
+
+  /* Colores de riesgo se imprimen */
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  /* Ocultar scrollbars en tablas */
+  .overflow-x-auto { overflow: visible !important; }
+
+  /* Orientación según el informe */
+  .print-landscape { }
+}
+
+@page {
+  margin: 1.5cm 1.2cm;
+  size: A4;
+}
+
+/* MIPER usa landscape por el ancho de la tabla */
+@page .print-landscape-page {
+  size: A4 landscape;
+}
+
+/* Colores de clasificación de riesgo (usados en informes) */
+.riesgo-tolerable   { background-color: #dcfce7 !important; color: #166534 !important; }
+.riesgo-moderado    { background-color: #fef9c3 !important; color: #854d0e !important; }
+.riesgo-importante  { background-color: #ffedd5 !important; color: #9a3412 !important; }
+.riesgo-intolerable { background-color: #fee2e2 !important; color: #991b1b !important; }
