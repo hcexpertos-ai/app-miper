@@ -6,7 +6,7 @@ import {
   Footer, PageNumber, VerticalAlign, Header,
 } from 'docx'
 import type { PtsRegistro, MiperRegistro, Tarea, Proceso, Empresa, CentroTrabajo } from '@/src/types'
-import { LABEL_CONTROL } from '@/src/types'
+// LABEL_CONTROL ya no se usa — tabla simplificada a 3 columnas
 
 const fmtFecha = (iso: string) =>
   iso ? new Date(iso + 'T12:00:00').toLocaleDateString('es-CL') : '—'
@@ -237,19 +237,19 @@ export async function exportarPtsWord(
   }
   const eppTable = new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [2400, W - 2400], rows: eppRows })
 
-  // ── Secuencia Operativa (desde MIPER) ────────────────────────────────────────
-  const seqW = [360, 1800, 1800, 2400, 1400, 1600]
+  // ── Secuencia Operativa, Riesgos y Medidas de Control ───────────────────────
+  const seqW = [400, 4180, W - 400 - 4180]
   const seqTable = new Table({
     width: { size: W, type: WidthType.DXA }, columnWidths: seqW,
     rows: [
       new TableRow({ tableHeader: true, children: [
-        th('N°', seqW[0], true), th('Peligro / Riesgo', seqW[1]),
-        th('Daño Probable', seqW[2]), th('Medidas de Control', seqW[3]),
-        th('Jerarquía', seqW[4], true), th('Nivel', seqW[5], true),
+        th('N°', seqW[0], true),
+        th('Riesgos Presentes', seqW[1]),
+        th('Medidas de Control', seqW[2]),
       ] }),
       ...(miperRows.length === 0
         ? [new TableRow({ children: [new TableCell({
-            columnSpan: 6, width: { size: W, type: WidthType.DXA }, borders, margins: pad,
+            columnSpan: 3, width: { size: W, type: WidthType.DXA }, borders, margins: pad,
             children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'Sin riesgos registrados en MIPER', font: 'Arial', size: 18, color: '94a3b8' })] })],
           })] })]
         : miperRows.map((m, i) => new TableRow({ children: [
@@ -269,22 +269,7 @@ export async function exportarPtsWord(
             new TableCell({
               width: { size: seqW[2], type: WidthType.DXA }, borders,
               shading: { fill: i % 2 === 0 ? WHITE : 'f8fafc', type: ShadingType.CLEAR }, margins: pad,
-              children: [new Paragraph({ children: [new TextRun({ text: m.dano_probable || '—', font: 'Arial', size: 18 })] })],
-            }),
-            new TableCell({
-              width: { size: seqW[3], type: WidthType.DXA }, borders,
-              shading: { fill: i % 2 === 0 ? WHITE : 'f8fafc', type: ShadingType.CLEAR }, margins: pad,
               children: [new Paragraph({ children: [new TextRun({ text: m.medida_control || '—', font: 'Arial', size: 18 })] })],
-            }),
-            new TableCell({
-              width: { size: seqW[4], type: WidthType.DXA }, borders,
-              shading: { fill: i % 2 === 0 ? WHITE : 'f8fafc', type: ShadingType.CLEAR }, margins: pad,
-              children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: m.tipo_control ? LABEL_CONTROL[m.tipo_control] : '—', font: 'Arial', size: 16 })] })],
-            }),
-            new TableCell({
-              width: { size: seqW[5], type: WidthType.DXA }, borders,
-              shading: { fill: i % 2 === 0 ? WHITE : 'f8fafc', type: ShadingType.CLEAR }, margins: pad,
-              children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: String(m.clasificacion_riesgo).toUpperCase(), font: 'Arial', size: 16, bold: true })] })],
             }),
           ] }))
       ),
@@ -305,7 +290,7 @@ export async function exportarPtsWord(
     ],
   }))
 
-  // ── Cuadro Validación ────────────────────────────────────────────────────────
+  // ── Cuadro Validación (Elaborado / Revisado / Aprobado) ─────────────────────
   const fw = Math.floor(W / 3)
   const valTable = new Table({
     width: { size: W, type: WidthType.DXA }, columnWidths: [fw, fw, W - fw * 2],
@@ -328,6 +313,33 @@ export async function exportarPtsWord(
       })) }),
     ],
   })
+
+  // ── Tabla Trabajador ─────────────────────────────────────────────────────────
+  const sigW = [Math.floor(W * 0.35), Math.floor(W * 0.18), Math.floor(W * 0.22), W - Math.floor(W * 0.35) - Math.floor(W * 0.18) - Math.floor(W * 0.22)]
+  function sigTable(titulo: string): Table {
+    return new Table({
+      width: { size: W, type: WidthType.DXA }, columnWidths: sigW,
+      rows: [
+        new TableRow({ tableHeader: true, children: [
+          new TableCell({
+            columnSpan: 4, width: { size: W, type: WidthType.DXA }, borders,
+            shading: { fill: 'e2e8f0', type: ShadingType.CLEAR }, margins: pad,
+            children: [new Paragraph({ children: [new TextRun({ text: titulo, font: 'Arial', size: 18, bold: true, color: '1e3a5f' })] })],
+          }),
+        ] }),
+        new TableRow({ tableHeader: true, children: [
+          th('Nombre', sigW[0]), th('RUT', sigW[1], true), th('Cargo', sigW[2]), th('Firma', sigW[3], true),
+        ] }),
+        new TableRow({ children: sigW.map((w, wi) => new TableCell({
+          width: { size: w, type: WidthType.DXA }, borders,
+          margins: { top: 400, bottom: 400, left: 120, right: 120 },
+          children: [new Paragraph({ children: [new TextRun({ text: wi === sigW.length - 1 ? '' : ' ', font: 'Arial', size: 20 })] })],
+        })) }),
+      ],
+    })
+  }
+  const trabajadorTable   = sigTable('Datos del Trabajador')
+  const responsableTable  = sigTable('Responsable de Capacitación')
 
   // ── Documento final ──────────────────────────────────────────────────────────
   const doc = new Document({
@@ -352,14 +364,18 @@ export async function exportarPtsWord(
           new TextRun({ text: `${empresa?.razon_social ?? '[Empresa]'} emite el presente PTS para garantizar la ejecución segura de ${tarea?.actividad ?? '[Tarea]'}.`, font: 'Arial', size: 16, color: '475569' }),
         ] }),
         secTitle('1', 'Objetivo y Alcance'), objTable,
-        secTitle('2', 'Descripción de la Actividad y Motivo del Procedimiento'), descTable,
-        secTitle('3', 'Responsabilidades'), respTable,
-        secTitle('4', 'Definiciones Legales y Técnicas'), defTable,
-        secTitle('5', 'Equipos, Herramientas y EPP'), eppTable,
-        secTitle('6', 'Secuencia Operativa Segura y Evaluación de Riesgos'), seqTable,
+        secTitle('2', 'Responsabilidades'), respTable,
+        secTitle('3', 'Definiciones Legales y Técnicas'), defTable,
+        secTitle('4', 'Equipos, Herramientas y EPP'), eppTable,
+        secTitle('5', 'Descripción de Actividades a Realizar'), descTable,
+        secTitle('6', 'Secuencia Operativa, Riesgos y Medidas de Control'), seqTable,
         secTitle('7', 'Marco Legal'),
         ...legalPar,
         secTitle('8', 'Cuadro de Responsabilidades y Validación'), valTable,
+        new Paragraph({ spacing: { before: 200, after: 60 } }),
+        trabajadorTable,
+        new Paragraph({ spacing: { before: 200, after: 60 } }),
+        responsableTable,
         new Paragraph({
           alignment: AlignmentType.CENTER, spacing: { before: 200, after: 0 },
           children: [new TextRun({ text: `Generado por App MIPER · DS 44 · Ley 16.744 · ${new Date().toLocaleDateString('es-CL')}`, font: 'Arial', size: 14, color: '94a3b8' })],

@@ -397,14 +397,8 @@ function PtsViewer({
             <SecTitle n="2" title="Alcance" />
             <p className="text-xs text-slate-700 leading-relaxed">{pts.alcance}</p>
 
-            {/* ── 3. Descripción de la Actividad ── */}
-            <SecTitle n="3" title="Descripción de la Actividad y Motivo del Procedimiento" />
-            <div className="bg-slate-50 border border-slate-200 rounded p-3 text-xs text-slate-700 leading-relaxed whitespace-pre-line">
-              {pts.descripcion_actividad || '—'}
-            </div>
-
-            {/* ── 4. Responsabilidades ── */}
-            <SecTitle n="4" title="Responsabilidades" />
+            {/* ── 3. Responsabilidades ── */}
+            <SecTitle n="3" title="Responsabilidades" />
             <table className="w-full border-collapse text-xs">
               <thead>
                 <tr className="bg-[#1e3a5f] text-white">
@@ -427,8 +421,8 @@ function PtsViewer({
               </tbody>
             </table>
 
-            {/* ── 5. Definiciones Legales y Técnicas ── */}
-            <SecTitle n="5" title="Definiciones Legales y Técnicas" />
+            {/* ── 4. Definiciones Legales y Técnicas ── */}
+            <SecTitle n="4" title="Definiciones Legales y Técnicas" />
             <div className="border border-slate-200 rounded text-xs divide-y divide-slate-100">
               {([
                 ['Accidente del Trabajo',        'Toda lesión que una persona sufra a causa o con ocasión del trabajo, y que le produzca incapacidad o muerte (Art. 5, Ley N° 16.744).'],
@@ -449,12 +443,12 @@ function PtsViewer({
               ))}
             </div>
 
-            {/* ── 6. EPP ── */}
-            <SecTitle n="6" title="Equipos, Herramientas y EPP" />
+            {/* ── 5. Equipos, Herramientas y EPP ── */}
+            <SecTitle n="5" title="Equipos, Herramientas y EPP" />
             <table className="w-full border-collapse text-xs">
               <thead>
                 <tr className="bg-[#1e3a5f] text-white">
-                  <th className="px-3 py-2 text-left border border-slate-300 w-48">Tipo de EPP</th>
+                  <th className="px-3 py-2 text-left border border-slate-300 w-48">Tipo</th>
                   <th className="px-3 py-2 text-left border border-slate-300">Elementos Requeridos</th>
                 </tr>
               </thead>
@@ -478,39 +472,33 @@ function PtsViewer({
               </tbody>
             </table>
 
-            {/* ── 7. Secuencia Operativa (desde MIPER) ── */}
-            <SecTitle n="7" title="Secuencia Operativa Segura y Evaluación de Riesgos" />
+            {/* ── 6. Descripción de Actividades a Realizar ── */}
+            <SecTitle n="6" title="Descripción de Actividades a Realizar" />
+            <div className="bg-slate-50 border border-slate-200 rounded p-3 text-xs text-slate-700 leading-relaxed whitespace-pre-line">
+              {pts.descripcion_actividad || '—'}
+            </div>
+
+            {/* ── 7. Secuencia Operativa, Riesgos y Medidas de Control ── */}
+            <SecTitle n="7" title="Secuencia Operativa, Riesgos y Medidas de Control" />
             <table className="w-full border-collapse text-xs">
               <thead>
                 <tr className="bg-[#1e3a5f] text-white">
-                  <th className="px-2 py-2 text-center border border-slate-300 w-8">N°</th>
-                  <th className="px-3 py-2 text-left border border-slate-300">Peligro / Riesgo</th>
-                  <th className="px-3 py-2 text-left border border-slate-300">Daño Probable</th>
-                  <th className="px-3 py-2 text-left border border-slate-300">Medidas de Control / Estándar Seguro</th>
-                  <th className="px-3 py-2 text-center border border-slate-300 w-24">Jerarquía</th>
-                  <th className="px-3 py-2 text-center border border-slate-300 w-20">Nivel</th>
+                  <th className="px-2 py-2 text-center border border-slate-300 w-10">N°</th>
+                  <th className="px-3 py-2 text-left border border-slate-300 w-2/5">Riesgos Presentes</th>
+                  <th className="px-3 py-2 text-left border border-slate-300">Medidas de Control</th>
                 </tr>
               </thead>
               <tbody>
                 {miperRows.length === 0 ? (
-                  <tr><td colSpan={6} className="text-center text-slate-400 py-4">Sin riesgos en MIPER</td></tr>
+                  <tr><td colSpan={3} className="text-center text-slate-400 py-4">Sin riesgos registrados en MIPER para esta tarea.</td></tr>
                 ) : miperRows.map((m, i) => (
-                  <tr key={m.id} className={i % 2 === 0 ? '' : 'bg-slate-50'}>
-                    <td className="px-2 py-2 border border-slate-200 text-center font-bold text-slate-400">{i + 1}</td>
+                  <tr key={m.id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                    <td className="px-2 py-2 border border-slate-200 text-center font-bold text-slate-500">{i + 1}</td>
                     <td className="px-3 py-2 border border-slate-200">
-                      <div className="font-semibold">{m.peligro}</div>
-                      <div className="text-slate-500">{m.riesgo}</div>
+                      <div className="font-semibold text-slate-700">{m.peligro}</div>
+                      <div className="text-slate-500 mt-0.5">{m.riesgo}</div>
                     </td>
-                    <td className="px-3 py-2 border border-slate-200 text-slate-600">{m.dano_probable || '—'}</td>
-                    <td className="px-3 py-2 border border-slate-200">{m.medida_control || '—'}</td>
-                    <td className="px-3 py-2 border border-slate-200 text-center text-xs text-slate-600">
-                      {m.tipo_control ? LABEL_CONTROL[m.tipo_control] : '—'}
-                    </td>
-                    <td className="px-2 py-2 border border-slate-200 text-center">
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${COLOR_RIESGO[m.clasificacion_riesgo as ClasificacionRiesgo]}`}>
-                        {String(m.clasificacion_riesgo).charAt(0).toUpperCase() + String(m.clasificacion_riesgo).slice(1)}
-                      </span>
-                    </td>
+                    <td className="px-3 py-2 border border-slate-200 text-slate-700">{m.medida_control || '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -532,9 +520,11 @@ function PtsViewer({
               ))}
             </ul>
 
-            {/* ── 9. Validación ── */}
+            {/* ── 9. Cuadro de Responsabilidades y Validación ── */}
             <SecTitle n="9" title="Cuadro de Responsabilidades y Validación" />
-            <table className="w-full border-collapse text-xs">
+
+            {/* Elaborado / Revisado / Aprobado */}
+            <table className="w-full border-collapse text-xs mb-4">
               <thead>
                 <tr className="bg-[#1e3a5f] text-white">
                   <th className="px-3 py-2 text-center border border-slate-300">Elaborado por</th>
@@ -552,6 +542,48 @@ function PtsViewer({
                       <div className="text-slate-400">{fmtFecha(pts[`${prefix}_fecha`])}</div>
                     </td>
                   ))}
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Tabla Trabajador */}
+            <p className="text-[10px] font-bold text-[#1e3a5f] uppercase tracking-widest mb-1 mt-3">Datos del Trabajador</p>
+            <table className="w-full border-collapse text-xs mb-4">
+              <thead>
+                <tr className="bg-slate-200 text-slate-700">
+                  <th className="px-3 py-2 text-center border border-slate-300">Nombre</th>
+                  <th className="px-3 py-2 text-center border border-slate-300 w-32">RUT</th>
+                  <th className="px-3 py-2 text-center border border-slate-300 w-40">Cargo</th>
+                  <th className="px-3 py-2 text-center border border-slate-300 w-36">Firma</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="px-3 py-6 border border-slate-200" />
+                  <td className="px-3 py-6 border border-slate-200" />
+                  <td className="px-3 py-6 border border-slate-200" />
+                  <td className="px-3 py-6 border border-slate-200" />
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Tabla Responsable de Capacitación */}
+            <p className="text-[10px] font-bold text-[#1e3a5f] uppercase tracking-widest mb-1 mt-2">Responsable de Capacitación</p>
+            <table className="w-full border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-200 text-slate-700">
+                  <th className="px-3 py-2 text-center border border-slate-300">Nombre</th>
+                  <th className="px-3 py-2 text-center border border-slate-300 w-32">RUT</th>
+                  <th className="px-3 py-2 text-center border border-slate-300 w-40">Cargo</th>
+                  <th className="px-3 py-2 text-center border border-slate-300 w-36">Firma</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="px-3 py-6 border border-slate-200" />
+                  <td className="px-3 py-6 border border-slate-200" />
+                  <td className="px-3 py-6 border border-slate-200" />
+                  <td className="px-3 py-6 border border-slate-200" />
                 </tr>
               </tbody>
             </table>
