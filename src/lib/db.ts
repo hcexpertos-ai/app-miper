@@ -6,7 +6,7 @@
 import { supabase } from './supabase'
 import type {
   Empresa, CentroTrabajo, Proceso, Tarea,
-  MiperRegistro, ProgramaTrabajo, IrlRegistro,
+  MiperRegistro, ProgramaTrabajo, IrlRegistro, PtsRegistro,
 } from '../types'
 import type { MiperSugerenciaIA, ContextoTarea, SugerenciaIA, EstadoRevisionIA } from '../types/ai'
 
@@ -205,4 +205,31 @@ export const dbIrl = {
 
   delete: (id: string) =>
     run<null>(supabase.from('irl_registros').delete().eq('id', id)),
+}
+
+// ─── PTS — Procedimiento de Trabajo Seguro ────────────────────────────────────
+
+type PtsInsert = Omit<PtsRegistro, 'id' | 'created_at'>
+type PtsUpdate = Partial<PtsInsert>
+
+export const dbPts = {
+  getByTareaIds: (tareaIds: string[]) =>
+    tareaIds.length === 0
+      ? Promise.resolve([] as PtsRegistro[])
+      : run<PtsRegistro[]>(
+          supabase
+            .from('pts_registros')
+            .select('*')
+            .in('tarea_id', tareaIds)
+            .order('created_at', { ascending: false })
+        ),
+
+  insert: (data: PtsInsert) =>
+    run<PtsRegistro>(supabase.from('pts_registros').insert(data).select().single()),
+
+  update: (id: string, data: PtsUpdate) =>
+    run<PtsRegistro>(supabase.from('pts_registros').update(data).eq('id', id).select().single()),
+
+  delete: (id: string) =>
+    run<null>(supabase.from('pts_registros').delete().eq('id', id)),
 }

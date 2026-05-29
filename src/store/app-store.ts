@@ -3,10 +3,10 @@
 import { create } from 'zustand'
 import type {
   Empresa, CentroTrabajo, Proceso, Tarea,
-  MiperRegistro, ProgramaTrabajo, EstadoPrograma, IrlRegistro,
+  MiperRegistro, ProgramaTrabajo, EstadoPrograma, IrlRegistro, PtsRegistro,
 } from '../types'
 import {
-  dbEmpresa, dbCentro, dbProceso, dbTarea, dbMiper, dbPrograma, dbIrl,
+  dbEmpresa, dbCentro, dbProceso, dbTarea, dbMiper, dbPrograma, dbIrl, dbPts,
 } from '../lib/db'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -27,6 +27,7 @@ interface State {
   miperRegistros:  MiperRegistro[]
   programaTrabajo: ProgramaTrabajo[]
   irlRegistros:    IrlRegistro[]
+  ptsRegistros:    PtsRegistro[]
   inicializado:    boolean
   cargando:        boolean
   error:           string | null
@@ -64,11 +65,17 @@ interface Actions {
   updateIrl: (id: string, data: Partial<Omit<IrlRegistro, 'id' | 'created_at'>>) => Promise<void>
   removeIrl: (id: string) => Promise<void>
 
+  // Módulo 5: PTS
+  addPts:    (data: Omit<PtsRegistro, 'id' | 'created_at'>) => Promise<PtsRegistro>
+  updatePts: (id: string, data: Partial<Omit<PtsRegistro, 'id' | 'created_at'>>) => Promise<void>
+  removePts: (id: string) => Promise<void>
+
   // Selectores
   tareasByProceso: (procesoId: string) => Tarea[]
   miperByTarea:    (tareaId: string) => MiperRegistro[]
   procesoByTarea:  (tareaId: string) => Proceso | undefined
   irlByTarea:      (tareaId: string) => IrlRegistro[]
+  ptsByTarea:      (tareaId: string) => PtsRegistro[]
 }
 
 type AppStore = State & Actions
@@ -83,6 +90,7 @@ const INITIAL: State = {
   miperRegistros:  [],
   programaTrabajo: [],
   irlRegistros:    [],
+  ptsRegistros:    [],
   inicializado:    false,
   cargando:        false,
   error:           null,
@@ -127,13 +135,12 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       const miperIds = miperRegistros.map(m => m.id)
       const programaTrabajo = await dbPrograma.getByMiperIds(miperIds)
 
-      // IRL carga de forma independiente — no bloquea si la tabla aún no existe
+      // IRL y PTS cargan de forma independiente — no bloquean si la tabla aún no existe
       let irlRegistros: IrlRegistro[] = []
-      try {
-        irlRegistros = await dbIrl.getByTareaIds(tareaIds)
-      } catch {
-        // tabla aún no migrada — se ignora silenciosamente
-      }
+      try { irlRegistros = await dbIrl.getByTareaIds(tareaIds) } catch { /* tabla pendiente */ }
+
+      let ptsRegistros: PtsRegistro[] = []
+      try { ptsRegistros = await dbPts.getByTareaIds(tareaIds) } catch { /* tabla pendiente */ }
 
       set({
         empresa,
@@ -146,6 +153,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
           estado: determinarEstado(pt),
         })),
         irlRegistros,
+        ptsRegistros,
         inicializado: true,
         cargando:     false,
       })
@@ -443,4 +451,44 @@ export const useAppStore = create<AppStore>()((set, get) => ({
 
   irlByTarea: (tareaId) =>
     get().irlRegistros.filter(r => r.tarea_id === tareaId),
+
+  // ── Módulo 5: PTS ─────────────────────────────────────────────────────────
+
+  addPts: async (data) => {
+    try {
+      const saved = await dbPts.insert(data)
+      set(s => ({ ptsRegistros: [saved, ...s.ptsRegistros] }))
+      return saved
+    } catch (err) {
+      set({ error: (err as Error).message })
+      throw err
+    }
+  },
+
+  updatePts: async (id, changes) => {
+    const prev = get().ptsRegistros.find(r => r.id === id)
+    set(s => ({ ptsRegistros: s.ptsRegistros.map(r => r.id === id ? { ...r, ...changes } : r) }))
+    try {
+      const saved = await dbPts.update(id, changes)
+      set(s => ({ ptsRegistros: s.ptsRegistros.map(r => r.id === id ? saved : r) }))
+    } catch (err) {
+      if (prev) set(s => ({ ptsRegistros: s.ptsRegistros.map(r => r.id === id ? prev : r) }))
+      set({ error: (err as Error).message })
+      throw err
+    }
+  },
+
+  removePts: async (id) => {
+    const prev = get().ptsRegistros
+    set(s => ({ ptsRegistros: s.ptsRegistros.filter(r => r.id !== id) }))
+    try {
+      await dbPts.delete(id)
+    } catch (err) {
+      set({ ptsRegistros: prev, error: (err as Error).message })
+      throw err
+    }
+  },
+
+  ptsByTarea: (tareaId) =>
+    get().ptsRegistros.filter(r => r.tarea_id === tareaId),
 }))

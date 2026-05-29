@@ -303,6 +303,30 @@ export interface IrlRegistro {
   created_at?:       string
 }
 
+// ─── Módulo 5: PTS — Procedimiento de Trabajo Seguro ─────────────────────────
+
+export interface PtsRegistro {
+  id: string
+  tarea_id: string
+  codigo: string
+  version: string
+  objetivo: string
+  alcance: string
+  epp_basico: string
+  epp_especifico: string
+  elaborado_nombre: string
+  elaborado_cargo: string
+  elaborado_fecha: string
+  revisado_nombre: string
+  revisado_cargo: string
+  revisado_fecha: string
+  aprobado_nombre: string
+  aprobado_cargo: string
+  aprobado_fecha: string
+  fecha_elaboracion: string
+  created_at?: string
+}
+
 export const LABEL_MOTIVO_IRL: Record<MotivoIrl, string> = {
   nuevo:               'Trabajador Nuevo',
   transferido:         'Trabajador Transferido',

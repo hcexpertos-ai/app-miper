@@ -11,6 +11,7 @@ const NAV = [
   { href: '/miper',         icon: '⚠️',  label: 'MIPER'        },
   { href: '/programa',      icon: '📅', label: 'Programa'      },
   { href: '/irl',           icon: '🔔', label: 'IRL'          },
+  { href: '/pts',           icon: '📋', label: 'PTS'           },
   { href: '/informes',      icon: '📄', label: 'Informes'      },
 ]
 
