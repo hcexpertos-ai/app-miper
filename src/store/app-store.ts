@@ -3,10 +3,10 @@
 import { create } from 'zustand'
 import type {
   Empresa, CentroTrabajo, Proceso, Tarea,
-  MiperRegistro, ProgramaTrabajo, EstadoPrograma,
+  MiperRegistro, ProgramaTrabajo, EstadoPrograma, IrlRegistro,
 } from '../types'
 import {
-  dbEmpresa, dbCentro, dbProceso, dbTarea, dbMiper, dbPrograma,
+  dbEmpresa, dbCentro, dbProceso, dbTarea, dbMiper, dbPrograma, dbIrl,
 } from '../lib/db'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -26,6 +26,7 @@ interface State {
   tareas:          Tarea[]
   miperRegistros:  MiperRegistro[]
   programaTrabajo: ProgramaTrabajo[]
+  irlRegistros:    IrlRegistro[]
   inicializado:    boolean
   cargando:        boolean
   error:           string | null
@@ -58,10 +59,16 @@ interface Actions {
   marcarCompletado: (id: string, fecha: string) => Promise<void>
   recomputarEstados: () => void
 
+  // Módulo 4: IRL
+  addIrl:    (data: Omit<IrlRegistro, 'id' | 'created_at'>) => Promise<IrlRegistro>
+  updateIrl: (id: string, data: Partial<Omit<IrlRegistro, 'id' | 'created_at'>>) => Promise<void>
+  removeIrl: (id: string) => Promise<void>
+
   // Selectores
   tareasByProceso: (procesoId: string) => Tarea[]
   miperByTarea:    (tareaId: string) => MiperRegistro[]
   procesoByTarea:  (tareaId: string) => Proceso | undefined
+  irlByTarea:      (tareaId: string) => IrlRegistro[]
 }
 
 type AppStore = State & Actions
@@ -75,6 +82,7 @@ const INITIAL: State = {
   tareas:          [],
   miperRegistros:  [],
   programaTrabajo: [],
+  irlRegistros:    [],
   inicializado:    false,
   cargando:        false,
   error:           null,
@@ -119,6 +127,14 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       const miperIds = miperRegistros.map(m => m.id)
       const programaTrabajo = await dbPrograma.getByMiperIds(miperIds)
 
+      // IRL carga de forma independiente — no bloquea si la tabla aún no existe
+      let irlRegistros: IrlRegistro[] = []
+      try {
+        irlRegistros = await dbIrl.getByTareaIds(tareaIds)
+      } catch {
+        // tabla aún no migrada — se ignora silenciosamente
+      }
+
       set({
         empresa,
         centro,
@@ -129,6 +145,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
           ...pt,
           estado: determinarEstado(pt),
         })),
+        irlRegistros,
         inicializado: true,
         cargando:     false,
       })
@@ -374,6 +391,43 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       })),
     })),
 
+  // ── Módulo 4: IRL ─────────────────────────────────────────────────────────
+
+  addIrl: async (data) => {
+    try {
+      const saved = await dbIrl.insert(data)
+      set(s => ({ irlRegistros: [saved, ...s.irlRegistros] }))
+      return saved
+    } catch (err) {
+      set({ error: (err as Error).message })
+      throw err
+    }
+  },
+
+  updateIrl: async (id, changes) => {
+    const prev = get().irlRegistros.find(r => r.id === id)
+    set(s => ({ irlRegistros: s.irlRegistros.map(r => r.id === id ? { ...r, ...changes } : r) }))
+    try {
+      const saved = await dbIrl.update(id, changes)
+      set(s => ({ irlRegistros: s.irlRegistros.map(r => r.id === id ? saved : r) }))
+    } catch (err) {
+      if (prev) set(s => ({ irlRegistros: s.irlRegistros.map(r => r.id === id ? prev : r) }))
+      set({ error: (err as Error).message })
+      throw err
+    }
+  },
+
+  removeIrl: async (id) => {
+    const prev = get().irlRegistros
+    set(s => ({ irlRegistros: s.irlRegistros.filter(r => r.id !== id) }))
+    try {
+      await dbIrl.delete(id)
+    } catch (err) {
+      set({ irlRegistros: prev, error: (err as Error).message })
+      throw err
+    }
+  },
+
   // ── Selectores ────────────────────────────────────────────────────────────
 
   tareasByProceso: (procesoId) =>
@@ -386,4 +440,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
     const tarea = get().tareas.find(t => t.id === tareaId)
     return tarea ? get().procesos.find(p => p.id === tarea.proceso_id) : undefined
   },
+
+  irlByTarea: (tareaId) =>
+    get().irlRegistros.filter(r => r.tarea_id === tareaId),
 }))

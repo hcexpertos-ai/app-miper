@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuthStore } from '../src/store/auth-store'
 
@@ -9,6 +10,7 @@ const NAV = [
   { href: '/levantamiento', icon: '📋', label: 'Levantamiento' },
   { href: '/miper',         icon: '⚠️',  label: 'MIPER'        },
   { href: '/programa',      icon: '📅', label: 'Programa'      },
+  { href: '/irl',           icon: '🔔', label: 'IRL'          },
   { href: '/informes',      icon: '📄', label: 'Informes'      },
 ]
 
@@ -31,9 +33,10 @@ export default function Navigation() {
       {/* ── Sidebar desktop ─────────────────────────────────────────────── */}
       <aside className="hidden md:flex w-60 shrink-0 bg-[#1e3a5f] text-white flex-col">
         {/* Logo */}
-        <div className="px-6 py-6 border-b border-white/20">
-          <div className="text-xl font-bold tracking-tight">App MIPER</div>
-          <div className="text-[11px] text-white/50 mt-0.5">DS 44 · Ley 16.744</div>
+        <div className="px-5 py-4 border-b border-white/20">
+          <Image src="/logo.png" alt="PRSO Logo" width={160} height={80} className="object-contain w-full h-auto mb-2" priority />
+          <div className="text-base font-bold tracking-tight">App MIPER</div>
+          <div className="text-[11px] text-white/50">DS 44 · Ley 16.744</div>
         </div>
 
         {/* Links */}

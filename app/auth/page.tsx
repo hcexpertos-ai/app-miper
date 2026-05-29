@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '../../src/store/auth-store'
 
@@ -60,10 +61,10 @@ export default function AuthPage() {
         {/* Logo / título */}
         <div className="text-center mb-8">
           <div
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
+            className="inline-flex items-center justify-center rounded-2xl mb-4 px-5 py-3"
             style={{ backgroundColor: '#1e3a5f' }}
           >
-            <span className="text-white text-2xl font-bold">M</span>
+            <Image src="/logo.png" alt="PRSO Logo" width={150} height={75} className="object-contain" priority />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">App MIPER</h1>
           <p className="text-sm text-gray-500 mt-1">Gestión de Prevención de Riesgos · DS 44</p>

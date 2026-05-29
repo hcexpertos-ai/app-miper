@@ -7,6 +7,13 @@ export const metadata: Metadata = {
   title: 'App MIPER · DS 44',
   description: 'Sistema de gestión de prevención de riesgos — DS 44 · Ley 16.744',
   manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon-32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -6,7 +6,7 @@
 import { supabase } from './supabase'
 import type {
   Empresa, CentroTrabajo, Proceso, Tarea,
-  MiperRegistro, ProgramaTrabajo,
+  MiperRegistro, ProgramaTrabajo, IrlRegistro,
 } from '../types'
 import type { MiperSugerenciaIA, ContextoTarea, SugerenciaIA, EstadoRevisionIA } from '../types/ai'
 
@@ -178,4 +178,31 @@ export const dbPrograma = {
     run<ProgramaTrabajo>(
       supabase.from('programa_trabajo').update(data).eq('id', id).select().single()
     ),
+}
+
+// ─── IRL — Información de Riesgos Laborales ───────────────────────────────────
+
+type IrlInsert = Omit<IrlRegistro, 'id' | 'created_at'>
+type IrlUpdate = Partial<IrlInsert>
+
+export const dbIrl = {
+  getByTareaIds: (tareaIds: string[]) =>
+    tareaIds.length === 0
+      ? Promise.resolve([] as IrlRegistro[])
+      : run<IrlRegistro[]>(
+          supabase
+            .from('irl_registros')
+            .select('*')
+            .in('tarea_id', tareaIds)
+            .order('created_at', { ascending: false })
+        ),
+
+  insert: (data: IrlInsert) =>
+    run<IrlRegistro>(supabase.from('irl_registros').insert(data).select().single()),
+
+  update: (id: string, data: IrlUpdate) =>
+    run<IrlRegistro>(supabase.from('irl_registros').update(data).eq('id', id).select().single()),
+
+  delete: (id: string) =>
+    run<null>(supabase.from('irl_registros').delete().eq('id', id)),
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useAppStore } from '@/src/store/app-store'
 import {
   exportLevantamientoExcel,
@@ -59,13 +60,19 @@ function ReportHeader({
     <div className="mb-6">
       {/* Banda azul superior */}
       <div className="bg-[#1e3a5f] text-white px-6 py-4 rounded-t-lg">
-        <div className="flex items-start justify-between gap-4">
-          <div>
+        <div className="flex items-center justify-between gap-4">
+          {/* Logo esquina izquierda */}
+          <div className="shrink-0">
+            <Image src="/logo.png" alt="PRSO Logo" width={120} height={60} className="object-contain" />
+          </div>
+          {/* Título centrado */}
+          <div className="flex-1 text-center">
             <h1 className="text-lg font-bold tracking-tight">{titulo}</h1>
             <p className="text-xs text-white/70 mt-0.5">{subtitulo}</p>
           </div>
+          {/* Fecha esquina derecha */}
           <div className="text-right text-xs text-white/60 shrink-0">
-            <div className="font-semibold text-white/90">App MIPER · DS 44</div>
+            <div className="font-semibold text-white/90">DS 44 · Ley 16.744</div>
             <div>Fecha: {fecha}</div>
           </div>
         </div>

@@ -260,3 +260,61 @@ export const COLOR_ESTADO: Record<EstadoPrograma, string> = {
   completado: 'bg-green-100 text-green-700',
   vencido:    'bg-red-100 text-red-700',
 }
+
+// ─── Módulo 4: IRL — Información de Riesgos Laborales ────────────────────────
+
+export type ModalidadIrl     = 'presencial' | 'elearning'
+export type TipoActividadIrl = 'interna' | 'externa'
+export type MotivoIrl        = 'nuevo' | 'transferido' | 'ausencia_prolongada'
+
+export interface MaterialAdjunto {
+  nombre: string
+  tipo:   string
+}
+
+export interface IrlRegistro {
+  id: string
+  tarea_id: string
+  // Información de la actividad
+  nombre_actividad:  string
+  fecha_inicio:      string
+  fecha_fin:         string
+  modalidad:         ModalidadIrl
+  n_horas:           string
+  tipo_actividad:    TipoActividadIrl
+  ejecutor_externo:  string
+  relator_nombre:    string
+  relator_cargo:     string
+  grupo_objetivo:    string
+  // Características del lugar de trabajo
+  espacio_trabajo:         string
+  condiciones_ambientales: string
+  condiciones_orden_aseo:  string
+  maquinas_herramientas:   string
+  // Material de complemento
+  material_complemento: boolean
+  materiales_json:      MaterialAdjunto[]
+  // Información del participante
+  nombre_trabajador: string
+  rut_trabajador:    string
+  cargo_trabajador:  string
+  motivo:            MotivoIrl
+  fecha_entrega:     string
+  created_at?:       string
+}
+
+export const LABEL_MOTIVO_IRL: Record<MotivoIrl, string> = {
+  nuevo:               'Trabajador Nuevo',
+  transferido:         'Trabajador Transferido',
+  ausencia_prolongada: 'Ausencia Prolongada',
+}
+
+export const LABEL_MODALIDAD_IRL: Record<ModalidadIrl, string> = {
+  presencial: 'Presencial',
+  elearning:  'E-learning',
+}
+
+export const LABEL_TIPO_ACTIVIDAD_IRL: Record<TipoActividadIrl, string> = {
+  interna: 'Interna',
+  externa: 'Externa',
+}
