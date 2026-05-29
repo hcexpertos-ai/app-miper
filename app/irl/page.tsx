@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useAppStore } from '@/src/store/app-store'
 import Modal from '@/components/Modal'
@@ -13,6 +13,7 @@ import {
   LABEL_MOTIVO_IRL, LABEL_MODALIDAD_IRL, LABEL_TIPO_ACTIVIDAD_IRL,
   LABEL_CATALOGO_RIESGO, LABEL_CONTROL,
 } from '@/src/types'
+import { exportarWord } from './generate-word'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -25,7 +26,7 @@ const fmtFecha = (iso: string) =>
 function formVacio(tareaId = ''): Omit<IrlRegistro, 'id' | 'created_at'> {
   return {
     tarea_id:                tareaId,
-    nombre_actividad:        'Charla ODI — Obligación de Informar',
+    nombre_actividad:        'Informar de los Riesgos Laborales',
     fecha_inicio:            hoy(),
     fecha_fin:               hoy(),
     modalidad:               'presencial',
@@ -424,26 +425,64 @@ function IrlViewer({
   miperRows: MiperRegistro[]
   onClose:   () => void
 }) {
-  const handlePrint = () => window.print()
+  const [descargandoWord, setDescargandoWord] = useState(false)
+  const [descargandoPdf,  setDescargandoPdf]  = useState(false)
+
+  const handlePdf = async () => {
+    setDescargandoPdf(true)
+    try {
+      const { default: html2canvas } = await import('html2canvas')
+      const { default: jsPDF }       = await import('jspdf')
+      const el = document.getElementById('irl-documento')
+      if (!el) return
+      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' })
+      const imgW   = 210
+      const imgH   = (canvas.height * imgW) / canvas.width
+      const pdf    = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+      let y = 0
+      const pageH = 297
+      while (y < imgH) {
+        if (y > 0) pdf.addPage()
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, -y, imgW, imgH)
+        y += pageH
+      }
+      pdf.save(`IRL_${irl.nombre_trabajador.replace(/\s+/g, '_')}_${irl.fecha_entrega}.pdf`)
+    } finally {
+      setDescargandoPdf(false)
+    }
+  }
+
+  const handleWord = async () => {
+    setDescargandoWord(true)
+    try {
+      await exportarWord(irl, { tarea, proceso, empresa, centro, miperRows })
+    } finally {
+      setDescargandoWord(false)
+    }
+  }
 
   return (
     <>
       {/* Barra de acción (solo pantalla) */}
       <div className="print:hidden fixed top-0 inset-x-0 z-50 bg-[#1e3a5f] text-white px-6 py-3 flex items-center justify-between">
         <span className="font-semibold text-sm">Vista IRL — {irl.nombre_trabajador}</span>
-        <div className="flex gap-3">
-          <button onClick={handlePrint}
-            className="bg-white text-[#1e3a5f] text-sm font-semibold px-4 py-1.5 rounded-lg hover:bg-blue-50">
-            🖨️ Imprimir / PDF
+        <div className="flex gap-2">
+          <button onClick={handleWord} disabled={descargandoWord}
+            className="bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white text-sm font-semibold px-4 py-1.5 rounded-lg flex items-center gap-1.5">
+            {descargandoWord ? '⏳' : '📝'} {descargandoWord ? 'Generando…' : 'Word'}
+          </button>
+          <button onClick={handlePdf} disabled={descargandoPdf}
+            className="bg-red-600 hover:bg-red-500 disabled:opacity-60 text-white text-sm font-semibold px-4 py-1.5 rounded-lg flex items-center gap-1.5">
+            {descargandoPdf ? '⏳' : '📄'} {descargandoPdf ? 'Generando…' : 'PDF'}
           </button>
           <button onClick={onClose}
-            className="text-white/70 hover:text-white text-sm">✕ Cerrar</button>
+            className="text-white/70 hover:text-white text-sm px-2">✕ Cerrar</button>
         </div>
       </div>
 
       {/* Documento imprimible */}
       <div className="print:pt-0 pt-16 min-h-screen bg-slate-100 print:bg-white">
-        <div className="max-w-4xl mx-auto bg-white shadow-lg print:shadow-none">
+        <div id="irl-documento" className="max-w-4xl mx-auto bg-white shadow-lg print:shadow-none">
           <div className="p-8 print:p-6 space-y-5 text-sm">
 
             {/* Encabezado */}
