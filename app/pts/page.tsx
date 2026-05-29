@@ -483,21 +483,20 @@ function PtsViewer({
             <table className="w-full border-collapse text-xs">
               <thead>
                 <tr className="bg-[#1e3a5f] text-white">
-                  <th className="px-2 py-2 text-center border border-slate-300 w-10">N°</th>
-                  <th className="px-3 py-2 text-left border border-slate-300 w-2/5">Riesgos Presentes</th>
+                  <th className="px-2 py-2 text-center border border-slate-300 w-8">N°</th>
+                  <th className="px-3 py-2 text-left border border-slate-300">Tareas a Realizar</th>
+                  <th className="px-3 py-2 text-left border border-slate-300">Riesgos Presentes</th>
                   <th className="px-3 py-2 text-left border border-slate-300">Medidas de Control</th>
                 </tr>
               </thead>
               <tbody>
                 {miperRows.length === 0 ? (
-                  <tr><td colSpan={3} className="text-center text-slate-400 py-4">Sin riesgos registrados en MIPER para esta tarea.</td></tr>
+                  <tr><td colSpan={4} className="text-center text-slate-400 py-4">Sin riesgos registrados en MIPER para esta tarea.</td></tr>
                 ) : miperRows.map((m, i) => (
                   <tr key={m.id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
                     <td className="px-2 py-2 border border-slate-200 text-center font-bold text-slate-500">{i + 1}</td>
-                    <td className="px-3 py-2 border border-slate-200">
-                      <div className="font-semibold text-slate-700">{m.peligro}</div>
-                      <div className="text-slate-500 mt-0.5">{m.riesgo}</div>
-                    </td>
+                    <td className="px-3 py-2 border border-slate-200 font-semibold text-slate-700">{m.peligro}</td>
+                    <td className="px-3 py-2 border border-slate-200 text-slate-600">{m.riesgo}</td>
                     <td className="px-3 py-2 border border-slate-200 text-slate-700">{m.medida_control || '—'}</td>
                   </tr>
                 ))}

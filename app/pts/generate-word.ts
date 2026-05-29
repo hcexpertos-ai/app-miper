@@ -238,18 +238,19 @@ export async function exportarPtsWord(
   const eppTable = new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [2400, W - 2400], rows: eppRows })
 
   // ── Secuencia Operativa, Riesgos y Medidas de Control ───────────────────────
-  const seqW = [400, 4180, W - 400 - 4180]
+  const seqW = [360, 2500, 2700, W - 360 - 2500 - 2700]
   const seqTable = new Table({
     width: { size: W, type: WidthType.DXA }, columnWidths: seqW,
     rows: [
       new TableRow({ tableHeader: true, children: [
-        th('N°', seqW[0], true),
-        th('Riesgos Presentes', seqW[1]),
-        th('Medidas de Control', seqW[2]),
+        th('N°',                  seqW[0], true),
+        th('Tareas a Realizar',   seqW[1]),
+        th('Riesgos Presentes',   seqW[2]),
+        th('Medidas de Control',  seqW[3]),
       ] }),
       ...(miperRows.length === 0
         ? [new TableRow({ children: [new TableCell({
-            columnSpan: 3, width: { size: W, type: WidthType.DXA }, borders, margins: pad,
+            columnSpan: 4, width: { size: W, type: WidthType.DXA }, borders, margins: pad,
             children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'Sin riesgos registrados en MIPER', font: 'Arial', size: 18, color: '94a3b8' })] })],
           })] })]
         : miperRows.map((m, i) => new TableRow({ children: [
@@ -261,13 +262,15 @@ export async function exportarPtsWord(
             new TableCell({
               width: { size: seqW[1], type: WidthType.DXA }, borders,
               shading: { fill: i % 2 === 0 ? WHITE : 'f8fafc', type: ShadingType.CLEAR }, margins: pad,
-              children: [
-                new Paragraph({ children: [new TextRun({ text: m.peligro, font: 'Arial', size: 18, bold: true })] }),
-                new Paragraph({ children: [new TextRun({ text: m.riesgo, font: 'Arial', size: 16, color: '64748b' })] }),
-              ],
+              children: [new Paragraph({ children: [new TextRun({ text: m.peligro, font: 'Arial', size: 18, bold: true })] })],
             }),
             new TableCell({
               width: { size: seqW[2], type: WidthType.DXA }, borders,
+              shading: { fill: i % 2 === 0 ? WHITE : 'f8fafc', type: ShadingType.CLEAR }, margins: pad,
+              children: [new Paragraph({ children: [new TextRun({ text: m.riesgo, font: 'Arial', size: 18, color: '475569' })] })],
+            }),
+            new TableCell({
+              width: { size: seqW[3], type: WidthType.DXA }, borders,
               shading: { fill: i % 2 === 0 ? WHITE : 'f8fafc', type: ShadingType.CLEAR }, margins: pad,
               children: [new Paragraph({ children: [new TextRun({ text: m.medida_control || '—', font: 'Arial', size: 18 })] })],
             }),
