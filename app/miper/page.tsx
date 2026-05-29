@@ -20,6 +20,79 @@ import { LABEL_FACTOR_RIESGO } from '@/src/types/ai'
 import type { FactorRiesgo } from '@/src/types/ai'
 import { dbSugerenciaIA } from '@/src/lib/db'
 
+// ─── Colores y descripciones de criterios de evaluación ──────────────────────
+
+const COLOR_PROB: Record<string, { bg: string; text: string; ring: string; dot: string }> = {
+  baja:  { bg: 'bg-green-50',  text: 'text-green-800',  ring: 'border-green-400', dot: 'bg-green-500'  },
+  media: { bg: 'bg-yellow-50', text: 'text-yellow-800', ring: 'border-yellow-400',dot: 'bg-yellow-400' },
+  alta:  { bg: 'bg-red-50',    text: 'text-red-800',    ring: 'border-red-400',   dot: 'bg-red-500'   },
+}
+
+const COLOR_CONS: Record<string, { bg: string; text: string; ring: string; dot: string }> = {
+  ligeramente_danino:    { bg: 'bg-green-50',  text: 'text-green-800',  ring: 'border-green-400',  dot: 'bg-green-500'  },
+  danino:                { bg: 'bg-yellow-50', text: 'text-yellow-800', ring: 'border-yellow-400', dot: 'bg-yellow-400' },
+  extremadamente_danino: { bg: 'bg-red-50',    text: 'text-red-800',    ring: 'border-red-400',    dot: 'bg-red-500'   },
+}
+
+const DESC_PROB: Record<string, string> = {
+  baja:  'El daño ocurrirá rara vez o en contadas ocasiones (posibilidad de ocurrencia remota).',
+  media: 'El daño ocurrirá en varias ocasiones (posibilidad de ocurrencia mediana), no siendo tan evidente.',
+  alta:  'El daño ocurrirá siempre o casi siempre (posibilidad de ocurrencia inmediata, siendo evidente que pasará).',
+}
+
+const DESC_CONS: Record<string, string> = {
+  ligeramente_danino:    'Pequeñas lesiones o daños superficiales (cortes, magulladuras, etc.) o molestias con tiempos rápidos de recuperación.',
+  danino:                'Lesiones (laceraciones, quemaduras, torceduras, etc.) y/o intoxicaciones que pueden causar incapacidad temporal.',
+  extremadamente_danino: 'Eventos extremadamente dañinos: amputaciones, lesiones múltiples con incapacidades permanentes o lesiones fatales.',
+}
+
+// ─── Selector con color + descripción ────────────────────────────────────────
+
+function ColorSelect<T extends string>({
+  value, onChange, options,
+}: {
+  value:    T
+  onChange: (v: T) => void
+  options:  { value: T; label: string; desc: string; colors: { bg: string; text: string; ring: string; dot: string } }[]
+}) {
+  const [open, setOpen] = useState(false)
+  const sel = options.find(o => o.value === value) ?? options[0]
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 text-left text-sm font-semibold transition-colors
+          ${sel.colors.bg} ${sel.colors.text} ${sel.colors.ring}`}
+      >
+        <span className={`w-3 h-3 rounded-full shrink-0 ${sel.colors.dot}`} />
+        <span className="flex-1">{sel.label}</span>
+        <span className="text-xs opacity-50 ml-1">{open ? '▴' : '▾'}</span>
+      </button>
+      {open && (
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden">
+          {options.map(opt => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => { onChange(opt.value); setOpen(false) }}
+              className={`w-full text-left px-4 py-3 hover:bg-slate-50 border-b border-slate-100 last:border-0
+                transition-colors ${value === opt.value ? opt.colors.bg : 'bg-white'}`}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className={`w-3 h-3 rounded-full shrink-0 ${opt.colors.dot}`} />
+                <span className={`text-sm font-bold ${opt.colors.text}`}>{opt.label}</span>
+                {value === opt.value && <span className="ml-auto text-xs opacity-50">✓</span>}
+              </div>
+              <p className="text-[11px] text-slate-500 pl-5 leading-snug">{opt.desc}</p>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Formulario MIPER ─────────────────────────────────────────────────────────
 
 function MiperForm({
@@ -326,27 +399,27 @@ function MiperForm({
             <div className="grid md:grid-cols-2 gap-4 mt-3">
               <div>
                 <label className="label">Probabilidad (P)</label>
-                <select
-                  className="select"
+                <ColorSelect<Probabilidad>
                   value={form.probabilidad}
-                  onChange={e => setForm(s => ({ ...s, probabilidad: e.target.value as Probabilidad }))}
-                >
-                  {(Object.entries(LABEL_PROBABILIDAD) as [Probabilidad, string][]).map(([v, l]) => (
-                    <option key={v} value={v}>{l}</option>
-                  ))}
-                </select>
+                  onChange={v => setForm(s => ({ ...s, probabilidad: v }))}
+                  options={[
+                    { value: 'baja',  label: 'Baja (1)',  desc: DESC_PROB.baja,  colors: COLOR_PROB.baja  },
+                    { value: 'media', label: 'Media (2)', desc: DESC_PROB.media, colors: COLOR_PROB.media },
+                    { value: 'alta',  label: 'Alta (4)',  desc: DESC_PROB.alta,  colors: COLOR_PROB.alta  },
+                  ]}
+                />
               </div>
               <div>
                 <label className="label">Consecuencia / Severidad (S)</label>
-                <select
-                  className="select"
+                <ColorSelect<Consecuencia>
                   value={form.consecuencia}
-                  onChange={e => setForm(s => ({ ...s, consecuencia: e.target.value as Consecuencia }))}
-                >
-                  {(Object.entries(LABEL_CONSECUENCIA) as [Consecuencia, string][]).map(([v, l]) => (
-                    <option key={v} value={v}>{l}</option>
-                  ))}
-                </select>
+                  onChange={v => setForm(s => ({ ...s, consecuencia: v }))}
+                  options={[
+                    { value: 'ligeramente_danino',    label: 'Baja — Ligeramente Dañino (1)', desc: DESC_CONS.ligeramente_danino,    colors: COLOR_CONS.ligeramente_danino    },
+                    { value: 'danino',                label: 'Media — Dañino (2)',             desc: DESC_CONS.danino,                colors: COLOR_CONS.danino                },
+                    { value: 'extremadamente_danino', label: 'Alta — Extremadamente Dañino (4)', desc: DESC_CONS.extremadamente_danino, colors: COLOR_CONS.extremadamente_danino },
+                  ]}
+                />
               </div>
             </div>
             <div className={`mt-3 rounded-xl px-5 py-4 border ${COLOR_RIESGO[clasificacion as ClasificacionRiesgo]}`}>
@@ -412,7 +485,7 @@ function MiperForm({
       {/* ── Sección 3: Medida de Control ─────────────────────────────────────── */}
       <div>
         <h3 className="text-xs font-bold text-[#1e3a5f] uppercase tracking-widest mb-3">
-          3. Medida de Control
+          3. Medidas de Control
         </h3>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
@@ -438,7 +511,7 @@ function MiperForm({
             />
           </div>
           <div className="md:col-span-2">
-            <label className="label">Medida de Control</label>
+            <label className="label">Medidas de Control</label>
             <textarea
               rows={2}
               className="input resize-none"
@@ -634,8 +707,8 @@ export default function MiperPage() {
                           <thead className="bg-[#1e3a5f]">
                             <tr>
                               {[
-                                'Peligro','Riesgo','Factor','P','C','Nivel de Riesgo',
-                                'Control','Medida','Responsable','Plazo','✓','Acciones',
+                                'Peligro','Riesgo','Factor','Probabilidad','Consecuencia','Nivel de Riesgo',
+                                'Control','Medidas de Control','Responsable','Plazo','✓','Acciones',
                               ].map(h => <th key={h} className="table-th">{h}</th>)}
                             </tr>
                           </thead>
@@ -658,11 +731,19 @@ export default function MiperPage() {
                                     (LABEL_FACTOR_RIESGO as Record<string, string>)[m.factor_riesgo] ?? '—'
                                   )}
                                 </td>
-                                <td className="table-td whitespace-nowrap text-xs">
-                                  {LABEL_PROBABILIDAD[m.probabilidad]}
+                                <td className="table-td whitespace-nowrap text-xs p-1">
+                                  <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md font-semibold
+                                    ${COLOR_PROB[m.probabilidad]?.bg ?? ''} ${COLOR_PROB[m.probabilidad]?.text ?? ''}`}>
+                                    <span className={`w-2 h-2 rounded-full ${COLOR_PROB[m.probabilidad]?.dot ?? ''}`} />
+                                    {LABEL_PROBABILIDAD[m.probabilidad]}
+                                  </span>
                                 </td>
-                                <td className="table-td whitespace-nowrap text-xs">
-                                  {LABEL_CONSECUENCIA[m.consecuencia]}
+                                <td className="table-td whitespace-nowrap text-xs p-1">
+                                  <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md font-semibold
+                                    ${COLOR_CONS[m.consecuencia]?.bg ?? ''} ${COLOR_CONS[m.consecuencia]?.text ?? ''}`}>
+                                    <span className={`w-2 h-2 rounded-full ${COLOR_CONS[m.consecuencia]?.dot ?? ''}`} />
+                                    {LABEL_CONSECUENCIA[m.consecuencia]}
+                                  </span>
                                 </td>
                                 <td className="table-td whitespace-nowrap">
                                   <RiesgoBadge
