@@ -150,6 +150,21 @@ export async function exportarPtsWord(
     ],
   })
 
+  // ── Descripción de la Actividad ──────────────────────────────────────────────
+  const descTable = new Table({
+    width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+    rows: [
+      new TableRow({ children: [
+        new TableCell({
+          width: { size: W, type: WidthType.DXA }, borders, margins: pad,
+          children: (pts.descripcion_actividad || '—').split('\n').map(
+            line => new Paragraph({ children: [new TextRun({ text: line, font: 'Arial', size: 18, color: '334155' })] })
+          ),
+        }),
+      ] }),
+    ],
+  })
+
   // ── Responsabilidades ────────────────────────────────────────────────────────
   const cols3 = [2400, W - 2400]
   const respTable = new Table({
@@ -337,13 +352,14 @@ export async function exportarPtsWord(
           new TextRun({ text: `${empresa?.razon_social ?? '[Empresa]'} emite el presente PTS para garantizar la ejecución segura de ${tarea?.actividad ?? '[Tarea]'}.`, font: 'Arial', size: 16, color: '475569' }),
         ] }),
         secTitle('1', 'Objetivo y Alcance'), objTable,
-        secTitle('2', 'Responsabilidades'), respTable,
-        secTitle('3', 'Definiciones Legales y Técnicas'), defTable,
-        secTitle('4', 'Equipos, Herramientas y EPP'), eppTable,
-        secTitle('5', 'Secuencia Operativa Segura y Evaluación de Riesgos'), seqTable,
-        secTitle('6', 'Marco Legal'),
+        secTitle('2', 'Descripción de la Actividad y Motivo del Procedimiento'), descTable,
+        secTitle('3', 'Responsabilidades'), respTable,
+        secTitle('4', 'Definiciones Legales y Técnicas'), defTable,
+        secTitle('5', 'Equipos, Herramientas y EPP'), eppTable,
+        secTitle('6', 'Secuencia Operativa Segura y Evaluación de Riesgos'), seqTable,
+        secTitle('7', 'Marco Legal'),
         ...legalPar,
-        secTitle('7', 'Cuadro de Responsabilidades y Validación'), valTable,
+        secTitle('8', 'Cuadro de Responsabilidades y Validación'), valTable,
         new Paragraph({
           alignment: AlignmentType.CENTER, spacing: { before: 200, after: 0 },
           children: [new TextRun({ text: `Generado por App MIPER · DS 44 · Ley 16.744 · ${new Date().toLocaleDateString('es-CL')}`, font: 'Arial', size: 14, color: '94a3b8' })],

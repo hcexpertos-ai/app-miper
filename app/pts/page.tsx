@@ -31,8 +31,11 @@ function formVacio(
     tarea_id:          tareaId,
     codigo:            `PTS-${String(idx).padStart(3, '0')}-${añoActual}`,
     version:           '01',
-    objetivo:          `Establecer un estándar operativo y metodológico sistemático para la ejecución segura de las tareas de ${nombre}, identificando de forma proactiva los peligros y evaluando los riesgos asociados, con el fin de implementar medidas de control que resguarden la integridad física y salud ocupacional de los trabajadores, en cumplimiento del marco legal vigente.`,
-    alcance:           `Este procedimiento es de cumplimiento obligatorio y aplica a todo el personal propio, subcontratado y contratistas que ejecuten las actividades de ${nombre} en las instalaciones de ${razon}.`,
+    objetivo:               `Establecer un estándar operativo y metodológico sistemático para la ejecución segura de las tareas de ${nombre}, identificando de forma proactiva los peligros y evaluando los riesgos asociados, con el fin de implementar medidas de control que resguarden la integridad física y salud ocupacional de los trabajadores, en cumplimiento del marco legal vigente.`,
+    alcance:                `Este procedimiento es de cumplimiento obligatorio y aplica a todo el personal propio, subcontratado y contratistas que ejecuten las actividades de ${nombre} en las instalaciones de ${razon}.`,
+    descripcion_actividad:  tarea?.descripcion_tarea
+      ? `${tarea.descripcion_tarea}\n\nEste procedimiento se elabora con el propósito de garantizar que la actividad "${nombre}" se ejecute de manera segura y estandarizada, estableciendo los pasos metodológicos necesarios, las medidas de control aplicables y los responsables de su cumplimiento, en estricto apego a la normativa vigente de prevención de riesgos laborales.`
+      : `Describir los pasos y actividades involucradas en la ejecución de "${nombre}", señalando los riesgos potenciales y las medidas de control requeridas para garantizar la seguridad de todos los trabajadores que participen en esta labor.\n\nEste procedimiento se elabora con el fin de dar cumplimiento a los requerimientos legales establecidos en el D.S. N° 44, Ley N° 16.744 y demás normativa aplicable, asegurando una metodología de trabajo segura y documentada.`,
     epp_basico:        '• Casco de seguridad con barbiquejo.\n• Calzado de seguridad dieléctrico/anticorte.\n• Lentes de seguridad con protección UV.\n• Chaleco de alta visibilidad (D.S. 594).',
     epp_especifico:    '',
     elaborado_nombre:  '',
@@ -143,6 +146,12 @@ function PtsFormModal({
             <label className="label">Alcance</label>
             <textarea rows={3} className="input resize-none" value={form.alcance}
               onChange={e => set('alcance', e.target.value)} />
+          </div>
+          <div>
+            <label className="label">Descripción de la Actividad y Motivo del Procedimiento</label>
+            <textarea rows={5} className="input resize-none" value={form.descripcion_actividad}
+              onChange={e => set('descripcion_actividad', e.target.value)}
+              placeholder="Describir las actividades a realizar y el motivo por el cual se elabora este procedimiento…" />
           </div>
         </div>
       )}
@@ -388,8 +397,14 @@ function PtsViewer({
             <SecTitle n="2" title="Alcance" />
             <p className="text-xs text-slate-700 leading-relaxed">{pts.alcance}</p>
 
-            {/* ── 3. Responsabilidades ── */}
-            <SecTitle n="3" title="Responsabilidades" />
+            {/* ── 3. Descripción de la Actividad ── */}
+            <SecTitle n="3" title="Descripción de la Actividad y Motivo del Procedimiento" />
+            <div className="bg-slate-50 border border-slate-200 rounded p-3 text-xs text-slate-700 leading-relaxed whitespace-pre-line">
+              {pts.descripcion_actividad || '—'}
+            </div>
+
+            {/* ── 4. Responsabilidades ── */}
+            <SecTitle n="4" title="Responsabilidades" />
             <table className="w-full border-collapse text-xs">
               <thead>
                 <tr className="bg-[#1e3a5f] text-white">
@@ -412,8 +427,8 @@ function PtsViewer({
               </tbody>
             </table>
 
-            {/* ── 4. Definiciones Legales y Técnicas ── */}
-            <SecTitle n="4" title="Definiciones Legales y Técnicas" />
+            {/* ── 5. Definiciones Legales y Técnicas ── */}
+            <SecTitle n="5" title="Definiciones Legales y Técnicas" />
             <div className="border border-slate-200 rounded text-xs divide-y divide-slate-100">
               {([
                 ['Accidente del Trabajo',        'Toda lesión que una persona sufra a causa o con ocasión del trabajo, y que le produzca incapacidad o muerte (Art. 5, Ley N° 16.744).'],
@@ -434,8 +449,8 @@ function PtsViewer({
               ))}
             </div>
 
-            {/* ── 5. EPP ── */}
-            <SecTitle n="5" title="Equipos, Herramientas y EPP" />
+            {/* ── 6. EPP ── */}
+            <SecTitle n="6" title="Equipos, Herramientas y EPP" />
             <table className="w-full border-collapse text-xs">
               <thead>
                 <tr className="bg-[#1e3a5f] text-white">
@@ -463,8 +478,8 @@ function PtsViewer({
               </tbody>
             </table>
 
-            {/* ── 6. Secuencia Operativa (desde MIPER) ── */}
-            <SecTitle n="6" title="Secuencia Operativa Segura y Evaluación de Riesgos" />
+            {/* ── 7. Secuencia Operativa (desde MIPER) ── */}
+            <SecTitle n="7" title="Secuencia Operativa Segura y Evaluación de Riesgos" />
             <table className="w-full border-collapse text-xs">
               <thead>
                 <tr className="bg-[#1e3a5f] text-white">
@@ -501,8 +516,8 @@ function PtsViewer({
               </tbody>
             </table>
 
-            {/* ── 7. Marco Legal ── */}
-            <SecTitle n="7" title="Marco Legal y Referencias Normativas" />
+            {/* ── 8. Marco Legal ── */}
+            <SecTitle n="8" title="Marco Legal y Referencias Normativas" />
             <ul className="text-xs text-slate-700 space-y-1 list-none pl-0">
               {[
                 ['Ley N° 16.744', 'Establece Normas sobre Accidentes del Trabajo y Enfermedades Profesionales.'],
@@ -517,8 +532,8 @@ function PtsViewer({
               ))}
             </ul>
 
-            {/* ── 8. Validación ── */}
-            <SecTitle n="8" title="Cuadro de Responsabilidades y Validación" />
+            {/* ── 9. Validación ── */}
+            <SecTitle n="9" title="Cuadro de Responsabilidades y Validación" />
             <table className="w-full border-collapse text-xs">
               <thead>
                 <tr className="bg-[#1e3a5f] text-white">

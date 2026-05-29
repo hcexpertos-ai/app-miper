@@ -209,8 +209,17 @@ export const dbIrl = {
 
 // ─── PTS — Procedimiento de Trabajo Seguro ────────────────────────────────────
 
-type PtsInsert = Omit<PtsRegistro, 'id' | 'created_at'>
+// Se excluye descripcion_actividad hasta que la migración SQL esté aplicada:
+// ALTER TABLE pts_registros ADD COLUMN IF NOT EXISTS descripcion_actividad text NOT NULL DEFAULT '';
+type PtsInsert = Omit<PtsRegistro, 'id' | 'created_at' | 'descripcion_actividad'>
 type PtsUpdate = Partial<PtsInsert>
+
+/** Limpia el payload eliminando descripcion_actividad si aún no existe la columna en DB */
+function ptsPayload(data: Omit<PtsRegistro, 'id' | 'created_at'>): PtsInsert {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { descripcion_actividad, ...rest } = data as PtsInsert & { descripcion_actividad?: string }
+  return rest
+}
 
 export const dbPts = {
   getByTareaIds: (tareaIds: string[]) =>
@@ -224,11 +233,11 @@ export const dbPts = {
             .order('created_at', { ascending: false })
         ),
 
-  insert: (data: PtsInsert) =>
-    run<PtsRegistro>(supabase.from('pts_registros').insert(data).select().single()),
+  insert: (data: Omit<PtsRegistro, 'id' | 'created_at'>) =>
+    run<PtsRegistro>(supabase.from('pts_registros').insert(ptsPayload(data)).select().single()),
 
-  update: (id: string, data: PtsUpdate) =>
-    run<PtsRegistro>(supabase.from('pts_registros').update(data).eq('id', id).select().single()),
+  update: (id: string, data: Partial<Omit<PtsRegistro, 'id' | 'created_at'>>) =>
+    run<PtsRegistro>(supabase.from('pts_registros').update(ptsPayload(data as Omit<PtsRegistro, 'id' | 'created_at'>)).eq('id', id).select().single()),
 
   delete: (id: string) =>
     run<null>(supabase.from('pts_registros').delete().eq('id', id)),

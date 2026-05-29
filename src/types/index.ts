@@ -312,6 +312,10 @@ export interface PtsRegistro {
   version: string
   objetivo: string
   alcance: string
+  /** Descripción de las actividades a realizar y motivo del procedimiento.
+   *  Requiere migración SQL: ALTER TABLE pts_registros ADD COLUMN IF NOT EXISTS descripcion_actividad text NOT NULL DEFAULT '';
+   *  Campo opcional mientras la migración esté pendiente. */
+  descripcion_actividad?: string
   epp_basico: string
   epp_especifico: string
   elaborado_nombre: string
