@@ -176,6 +176,39 @@ export async function exportarPtsWord(
     ],
   })
 
+  // ── Definiciones Legales y Técnicas ─────────────────────────────────────────
+  const definiciones: [string, string][] = [
+    ['Accidente del Trabajo',         'Toda lesión que una persona sufra a causa o con ocasión del trabajo, y que le produzca incapacidad o muerte (Art. 5, Ley N° 16.744).'],
+    ['Accidente de Trayecto',          'Ocurridos en el trayecto directo, de ida o regreso, entre la habitación y el lugar del trabajo, o entre dos lugares de trabajo distintos (Art. 5, Ley N° 16.744).'],
+    ['Enfermedad Profesional',         'La causada de manera directa por el ejercicio de la profesión o el trabajo que realice una persona y que le produzca incapacidad o muerte (Art. 7, Ley N° 16.744).'],
+    ['Acoso y Violencia en el Trabajo','Conductas de agresión u hostigamiento reiterado (acoso laboral), no reiterado (acoso sexual) o violencia por terceros. Deben garantizarse entornos libres de violencia (Ley N° 21.643).'],
+    ['EPP',                            'Todo equipo, aparato o dispositivo fabricado para preservar el cuerpo humano de riesgos específicos de accidentes del trabajo o enfermedades profesionales (D.S. N° 594).'],
+    ['Peligro',                        'Fuente, situación o acto con potencial para causar daño humano, deterioro de la salud, o daños materiales a los equipos e instalaciones.'],
+    ['Riesgo',                         'Probabilidad de que un peligro se materialice en determinadas condiciones y produzca daños. Su evaluación estima la magnitud para decidir si son tolerables.'],
+    ['Incidente',                      'Evento relacionado con el trabajo en el que ocurrió o pudo haber ocurrido lesión, enfermedad o fatalidad. Sin daños, se denomina cuasi accidente.'],
+    ['Acción Subestándar',             'Todo acto u omisión del trabajador que viola un procedimiento o normativa de seguridad.'],
+    ['Condición Subestándar',          'Desviación en el entorno físico o en los equipos que representa un peligro para las personas o las instalaciones.'],
+  ]
+  const defCols = [2200, W - 2200]
+  const defTable = new Table({
+    width: { size: W, type: WidthType.DXA }, columnWidths: defCols,
+    rows: [
+      new TableRow({ tableHeader: true, children: [th('Término', defCols[0]), th('Definición', defCols[1])] }),
+      ...definiciones.map(([term, def], i) => new TableRow({ children: [
+        new TableCell({
+          width: { size: defCols[0], type: WidthType.DXA }, borders,
+          shading: { fill: i % 2 === 0 ? WHITE : 'f8fafc', type: ShadingType.CLEAR }, margins: pad,
+          children: [new Paragraph({ children: [new TextRun({ text: term, font: 'Arial', size: 18, bold: true, color: AZUL })] })],
+        }),
+        new TableCell({
+          width: { size: defCols[1], type: WidthType.DXA }, borders,
+          shading: { fill: i % 2 === 0 ? WHITE : 'f8fafc', type: ShadingType.CLEAR }, margins: pad,
+          children: [new Paragraph({ children: [new TextRun({ text: def, font: 'Arial', size: 18, color: '475569' })] })],
+        }),
+      ] })),
+    ],
+  })
+
   // ── EPP ──────────────────────────────────────────────────────────────────────
   const eppRows: TableRow[] = [
     new TableRow({ tableHeader: true, children: [th('Tipo de EPP', 2400), th('Elementos Requeridos', W - 2400)] }),
@@ -305,11 +338,12 @@ export async function exportarPtsWord(
         ] }),
         secTitle('1', 'Objetivo y Alcance'), objTable,
         secTitle('2', 'Responsabilidades'), respTable,
-        secTitle('3', 'Equipos, Herramientas y EPP'), eppTable,
-        secTitle('4', 'Secuencia Operativa Segura y Evaluación de Riesgos'), seqTable,
-        secTitle('5', 'Marco Legal'),
+        secTitle('3', 'Definiciones Legales y Técnicas'), defTable,
+        secTitle('4', 'Equipos, Herramientas y EPP'), eppTable,
+        secTitle('5', 'Secuencia Operativa Segura y Evaluación de Riesgos'), seqTable,
+        secTitle('6', 'Marco Legal'),
         ...legalPar,
-        secTitle('6', 'Cuadro de Responsabilidades y Validación'), valTable,
+        secTitle('7', 'Cuadro de Responsabilidades y Validación'), valTable,
         new Paragraph({
           alignment: AlignmentType.CENTER, spacing: { before: 200, after: 0 },
           children: [new TextRun({ text: `Generado por App MIPER · DS 44 · Ley 16.744 · ${new Date().toLocaleDateString('es-CL')}`, font: 'Arial', size: 14, color: '94a3b8' })],

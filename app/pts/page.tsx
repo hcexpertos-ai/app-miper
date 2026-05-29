@@ -412,8 +412,30 @@ function PtsViewer({
               </tbody>
             </table>
 
-            {/* ── 4. EPP ── */}
-            <SecTitle n="4" title="Equipos, Herramientas y EPP" />
+            {/* ── 4. Definiciones Legales y Técnicas ── */}
+            <SecTitle n="4" title="Definiciones Legales y Técnicas" />
+            <div className="border border-slate-200 rounded text-xs divide-y divide-slate-100">
+              {([
+                ['Accidente del Trabajo',        'Toda lesión que una persona sufra a causa o con ocasión del trabajo, y que le produzca incapacidad o muerte (Art. 5, Ley N° 16.744).'],
+                ['Accidente de Trayecto',         'Ocurridos en el trayecto directo, de ida o regreso, entre la habitación y el lugar del trabajo, o entre dos lugares de trabajo distintos (Art. 5, Ley N° 16.744).'],
+                ['Enfermedad Profesional',        'La causada de manera directa por el ejercicio de la profesión o el trabajo que realice una persona y que le produzca incapacidad o muerte (Art. 7, Ley N° 16.744).'],
+                ['Acoso y Violencia en el Trabajo','Conductas que constituyan agresión u hostigamiento reiterado (acoso laboral), no reiterado (acoso sexual) o violencia ejercida por terceros. Deben garantizarse entornos libres de violencia (Ley N° 21.643).'],
+                ['Elemento de Protección Personal (EPP)', 'Todo equipo, aparato o dispositivo fabricado para preservar el cuerpo humano, en todo o en parte, de riesgos específicos de accidentes del trabajo o enfermedades profesionales (D.S. N° 594).'],
+                ['Peligro',                       'Fuente, situación o acto con potencial para causar daño humano, deterioro de la salud, o daños materiales a los equipos e instalaciones.'],
+                ['Riesgo',                        'Probabilidad de que un peligro se materialice en determinadas condiciones y produzca daños. Su evaluación estima la magnitud de los riesgos para decidir si son tolerables.'],
+                ['Incidente',                     'Evento relacionado con el trabajo en el que ocurrió o pudo haber ocurrido lesión, enfermedad o fatalidad. Si no genera daños ni lesiones, se denomina cuasi accidente.'],
+                ['Acción Subestándar',            'Todo acto u omisión del trabajador que viola un procedimiento o normativa de seguridad.'],
+                ['Condición Subestándar',         'Desviación en el entorno físico o en los equipos que representa un peligro para las personas o las instalaciones.'],
+              ] as [string, string][]).map(([term, def], i) => (
+                <div key={i} className={`flex gap-0 ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}>
+                  <div className="px-3 py-2 font-semibold text-[#1e3a5f] w-56 shrink-0 border-r border-slate-200">{term}</div>
+                  <div className="px-3 py-2 text-slate-600 leading-relaxed">{def}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* ── 5. EPP ── */}
+            <SecTitle n="5" title="Equipos, Herramientas y EPP" />
             <table className="w-full border-collapse text-xs">
               <thead>
                 <tr className="bg-[#1e3a5f] text-white">
@@ -441,8 +463,8 @@ function PtsViewer({
               </tbody>
             </table>
 
-            {/* ── 5. Secuencia Operativa (desde MIPER) ── */}
-            <SecTitle n="5" title="Secuencia Operativa Segura y Evaluación de Riesgos" />
+            {/* ── 6. Secuencia Operativa (desde MIPER) ── */}
+            <SecTitle n="6" title="Secuencia Operativa Segura y Evaluación de Riesgos" />
             <table className="w-full border-collapse text-xs">
               <thead>
                 <tr className="bg-[#1e3a5f] text-white">
@@ -479,8 +501,8 @@ function PtsViewer({
               </tbody>
             </table>
 
-            {/* ── 6. Marco Legal ── */}
-            <SecTitle n="6" title="Marco Legal y Referencias Normativas" />
+            {/* ── 7. Marco Legal ── */}
+            <SecTitle n="7" title="Marco Legal y Referencias Normativas" />
             <ul className="text-xs text-slate-700 space-y-1 list-none pl-0">
               {[
                 ['Ley N° 16.744', 'Establece Normas sobre Accidentes del Trabajo y Enfermedades Profesionales.'],
@@ -495,8 +517,8 @@ function PtsViewer({
               ))}
             </ul>
 
-            {/* ── 7. Validación ── */}
-            <SecTitle n="7" title="Cuadro de Responsabilidades y Validación" />
+            {/* ── 8. Validación ── */}
+            <SecTitle n="8" title="Cuadro de Responsabilidades y Validación" />
             <table className="w-full border-collapse text-xs">
               <thead>
                 <tr className="bg-[#1e3a5f] text-white">
