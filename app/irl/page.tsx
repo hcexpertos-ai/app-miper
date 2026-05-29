@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useAppStore } from '@/src/store/app-store'
 import Modal from '@/components/Modal'
@@ -426,31 +426,6 @@ function IrlViewer({
   onClose:   () => void
 }) {
   const [descargandoWord, setDescargandoWord] = useState(false)
-  const [descargandoPdf,  setDescargandoPdf]  = useState(false)
-
-  const handlePdf = async () => {
-    setDescargandoPdf(true)
-    try {
-      const { default: html2canvas } = await import('html2canvas')
-      const { default: jsPDF }       = await import('jspdf')
-      const el = document.getElementById('irl-documento')
-      if (!el) return
-      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' })
-      const imgW   = 210
-      const imgH   = (canvas.height * imgW) / canvas.width
-      const pdf    = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-      let y = 0
-      const pageH = 297
-      while (y < imgH) {
-        if (y > 0) pdf.addPage()
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, -y, imgW, imgH)
-        y += pageH
-      }
-      pdf.save(`IRL_${irl.nombre_trabajador.replace(/\s+/g, '_')}_${irl.fecha_entrega}.pdf`)
-    } finally {
-      setDescargandoPdf(false)
-    }
-  }
 
   const handleWord = async () => {
     setDescargandoWord(true)
@@ -460,6 +435,8 @@ function IrlViewer({
       setDescargandoWord(false)
     }
   }
+
+  const handleImprimir = () => window.print()
 
   return (
     <>
@@ -471,9 +448,9 @@ function IrlViewer({
             className="bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white text-sm font-semibold px-4 py-1.5 rounded-lg flex items-center gap-1.5">
             {descargandoWord ? '⏳' : '📝'} {descargandoWord ? 'Generando…' : 'Word'}
           </button>
-          <button onClick={handlePdf} disabled={descargandoPdf}
-            className="bg-red-600 hover:bg-red-500 disabled:opacity-60 text-white text-sm font-semibold px-4 py-1.5 rounded-lg flex items-center gap-1.5">
-            {descargandoPdf ? '⏳' : '📄'} {descargandoPdf ? 'Generando…' : 'PDF'}
+          <button onClick={handleImprimir}
+            className="bg-white text-[#1e3a5f] text-sm font-semibold px-4 py-1.5 rounded-lg hover:bg-blue-50 flex items-center gap-1.5">
+            🖨️ Imprimir / PDF
           </button>
           <button onClick={onClose}
             className="text-white/70 hover:text-white text-sm px-2">✕ Cerrar</button>
