@@ -95,18 +95,13 @@
   /* Ocultar scrollbars en tablas */
   .overflow-x-auto { overflow: visible !important; }
 
-  /* Orientación según el informe */
-  .print-landscape { }
 }
 
+/* @page con margen 0 elimina el encabezado/pie del navegador (URL, título, fecha).
+   El módulo Informes sobreescribe esto dinámicamente con sus propios márgenes antes de imprimir. */
 @page {
-  margin: 1.5cm 1.2cm;
-  size: A4;
-}
-
-/* MIPER usa landscape por el ancho de la tabla */
-@page .print-landscape-page {
-  size: A4 landscape;
+  margin: 0;
+  size: A4 portrait;
 }
 
 /* Colores de clasificación de riesgo (usados en informes) */

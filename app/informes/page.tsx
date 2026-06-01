@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useAppStore } from '@/src/store/app-store'
 import {
@@ -152,7 +152,7 @@ function InformeLevantamiento() {
           <div className="bg-slate-50 border border-slate-200 rounded px-3 py-2">
             <span className="text-slate-500">Responsable levantamiento:</span>{' '}
             <strong className="text-slate-700">
-              {procesos.map(p => p.responsable_levantamiento).filter(Boolean).join(' / ') || '—'}
+              {Array.from(new Set(procesos.map(p => p.responsable_levantamiento).filter(Boolean))).join(' / ') || '—'}
             </strong>
           </div>
           <div className="bg-slate-50 border border-slate-200 rounded px-3 py-2">
@@ -375,7 +375,7 @@ function InformeMiper() {
         <div className="text-center py-10 text-slate-400 text-sm">Sin registros MIPER</div>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-[#1e3a5f]/30">
-          <table className="w-full border-collapse text-[10px]" style={{ minWidth: '1300px' }}>
+          <table className="miper-print-table w-full border-collapse text-[10px]" style={{ minWidth: '1300px' }}>
 
             {/* ══ ENCABEZADO TRIPLE ══════════════════════════════════════════ */}
             <thead>
@@ -385,8 +385,8 @@ function InformeMiper() {
                 <TH3 cls="align-middle" children={<span>Puestos de<br/>trabajo<span className="font-normal text-white/60">*</span></span>} />
                 <TH3 cls="align-middle" children={<span>Tareas<span className="font-normal text-white/60">*</span></span>} />
                 <TH3 cls="align-middle max-w-[130px]" children={<span>IDENTIFICACIÓN<br/>DE PELIGROS<span className="font-normal text-white/60">**</span></span>} />
-                <TH3 cls="align-middle max-w-[100px]" children={<span>FACTORES<br/>DE RIESGOS<span className="font-normal text-white/60">**</span></span>} />
-                <TH3 cls="align-middle" children={<span>RIESGO<span className="font-normal text-white/60">***</span></span>} />
+                <TH3 cls="align-middle max-w-[100px]" children={<span>RIESGO<span className="font-normal text-white/60">**</span><br/><span className="font-normal text-white/60 text-[8px]">Anexo N°3</span></span>} />
+                <TH3 cls="align-middle" children={<span>FACTOR DE<br/>RIESGO<span className="font-normal text-white/60">***</span><br/><span className="font-normal text-white/60 text-[8px]">Método GEMA</span></span>} />
                 {/* EVALUACIÓN DE RIESGOS */}
                 <th colSpan={10} className="border border-[#1e3a5f]/40 px-2 py-2 text-center text-[10px] font-bold text-white bg-[#1e6bb5]">
                   EVALUACIÓN DE RIESGOS
@@ -575,10 +575,10 @@ function InformeMiper() {
       <div className="mt-3 grid grid-cols-2 gap-4 text-[9px] text-slate-500 border-t border-slate-100 pt-2">
         <div className="space-y-0.5">
           <p>* = Información recopilada de la etapa levantamiento de procesos (Anexo N°2)</p>
-          <p>** = Obtenidos según aplicación ítem 6.2 de la Guía (catálogo Anexo N°3)</p>
+          <p>** = Riesgo codificado según catálogo Anexo N°3 de la Guía (ítem 6.2)</p>
         </div>
         <div className="space-y-0.5">
-          <p>*** = Obtenido del listado del Anexo N°3 de la Guía</p>
+          <p>*** = Factor de Riesgo según Método GEMA: Factor Humano, Equipos, Materiales o Ambiente</p>
           <p>**** = Obtenido de la aplicación del ítem 6.3 de la Guía · Higiénicos/Psicosociales/ME: resultado de protocolo MINSAL vigente</p>
         </div>
       </div>
@@ -654,10 +654,10 @@ function InformePrograma() {
           <table className="w-full text-[11px]" style={{ minWidth: '820px' }}>
             <thead className="bg-[#1e3a5f]">
               <tr>
-                {['N°', 'Proceso', 'Medida de Control',
+                {['N°', 'Proceso', 'Medida de Control / Actividades a Realizar',
                   'Responsable', 'F. Programada', 'F. Efectiva',
                   'Avance', 'Estado'].map(h => (
-                  <th key={h} className="table-th text-[10px] whitespace-nowrap py-2.5">{h}</th>
+                  <th key={h} className="table-th text-[10px] py-2.5">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -728,10 +728,53 @@ function SinDatos() {
 // ══════════════════════════════════════════════════════════════════════════════
 
 export default function InformesPage() {
-  const [activo, setActivo] = useState<Reporte>('levantamiento')
+  const [activo, setActivo]           = useState<Reporte>('levantamiento')
+  const [orientacion, setOrientacion] = useState<'portrait' | 'landscape'>('portrait')
   const { empresa, centro, procesos, tareas, miperRegistros, programaTrabajo } = useAppStore()
 
-  const handlePrint = () => window.print()
+  // MIPER es ancho → landscape por defecto; los demás portrait
+  useEffect(() => {
+    setOrientacion(activo === 'miper' ? 'landscape' : 'portrait')
+  }, [activo])
+
+  const handlePrint = () => {
+    const styleId = '__print-page-size__'
+    let el = document.getElementById(styleId) as HTMLStyleElement | null
+    if (!el) {
+      el = document.createElement('style')
+      el.id = styleId
+      document.head.appendChild(el)
+    }
+
+    // margin: 0 elimina encabezado/pie del navegador; el padding va directo al contenido
+    const padding = orientacion === 'landscape' ? '0.4cm 0.5cm' : '1.2cm 1.4cm'
+
+    el.textContent = `
+      @page { size: A4 ${orientacion}; margin: 0; }
+
+      @media print {
+        /* Compensar margen 0 con padding en el contenedor del documento */
+        .report-doc { padding: ${padding} !important; }
+
+        /* MIPER landscape: tabla compacta para entrar en una página */
+        ${orientacion === 'landscape' ? `
+          .miper-print-table {
+            font-size: 7.5px !important;
+            min-width: unset !important;
+            width: 100% !important;
+            table-layout: fixed !important;
+          }
+          .miper-print-table th,
+          .miper-print-table td {
+            padding: 2px 3px !important;
+            word-break: break-word !important;
+          }
+        ` : ''}
+      }
+    `
+    window.print()
+    setTimeout(() => document.getElementById(styleId)?.remove(), 2000)
+  }
 
   const handleExcel = () => {
     if (activo === 'levantamiento') {
@@ -776,7 +819,40 @@ export default function InformesPage() {
           </div>
 
           {/* Acciones */}
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+
+            {/* Selector de orientación */}
+            <div className="flex items-center rounded-lg border border-slate-200 overflow-hidden text-xs font-medium shadow-sm">
+              <button
+                onClick={() => setOrientacion('portrait')}
+                title="Hoja Vertical (Portrait)"
+                className={`flex items-center gap-1.5 px-3 py-2.5 transition-colors
+                  ${orientacion === 'portrait'
+                    ? 'bg-[#1e3a5f] text-white'
+                    : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+              >
+                {/* Ícono hoja vertical */}
+                <svg width="10" height="13" viewBox="0 0 10 13" fill="currentColor">
+                  <rect x="0.5" y="0.5" width="9" height="12" rx="1" fill="none" stroke="currentColor"/>
+                </svg>
+                <span className="hidden sm:inline">Vertical</span>
+              </button>
+              <button
+                onClick={() => setOrientacion('landscape')}
+                title="Hoja Horizontal (Landscape)"
+                className={`flex items-center gap-1.5 px-3 py-2.5 transition-colors border-l border-slate-200
+                  ${orientacion === 'landscape'
+                    ? 'bg-[#1e3a5f] text-white'
+                    : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+              >
+                {/* Ícono hoja horizontal */}
+                <svg width="13" height="10" viewBox="0 0 13 10" fill="currentColor">
+                  <rect x="0.5" y="0.5" width="12" height="9" rx="1" fill="none" stroke="currentColor"/>
+                </svg>
+                <span className="hidden sm:inline">Horizontal</span>
+              </button>
+            </div>
+
             {/* Exportar Excel */}
             <button
               onClick={handleExcel}

@@ -6,13 +6,16 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useAuthStore } from '../src/store/auth-store'
 
 const NAV = [
-  { href: '/',              icon: '📊', label: 'Dashboard'    },
-  { href: '/levantamiento', icon: '📋', label: 'Levantamiento' },
-  { href: '/miper',         icon: '⚠️',  label: 'MIPER'        },
-  { href: '/programa',      icon: '📅', label: 'Programa'      },
-  { href: '/irl',           icon: '🔔', label: 'IRL'          },
-  { href: '/pts',           icon: '📋', label: 'PTS'           },
-  { href: '/informes',      icon: '📄', label: 'Informes'      },
+  { href: '/',                icon: '📊', label: 'Dashboard'       },
+  { href: '/autoevaluacion',  icon: '✅', label: 'Eval. Legal'     },
+  { href: '/levantamiento',   icon: '📋', label: 'Levantamiento'   },
+  { href: '/miper',           icon: '⚠️',  label: 'MIPER'           },
+  { href: '/programa',        icon: '📅', label: 'Prog. de Trabajo' },
+  { href: '/irl',             icon: '🔔', label: 'IRL'              },
+  { href: '/pts',             icon: '📋', label: 'PTS'              },
+  { href: '/plan-respuesta',  icon: '🚨', label: 'Plan Emergencia'  },
+  { href: '/fuf',             icon: '🔍', label: 'FUF DS44'         },
+  { href: '/informes',        icon: '📄', label: 'Informes'        },
 ]
 
 export default function Navigation() {

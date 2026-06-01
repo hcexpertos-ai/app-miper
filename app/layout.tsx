@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import Navigation  from '@/components/Navigation'
-import AuthGuard   from '@/components/AuthGuard'
+import Navigation        from '@/components/Navigation'
+import AuthGuard         from '@/components/AuthGuard'
+import GlobalCapitalize  from '@/src/components/GlobalCapitalize'
 
 export const metadata: Metadata = {
-  title: 'App MIPER · DS 44',
+  title: 'PRSO · Prevención de Riesgos DS 44',
   description: 'Sistema de gestión de prevención de riesgos — DS 44 · Ley 16.744',
   manifest: '/manifest.json',
   icons: {
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body>
+        <GlobalCapitalize />
         <AuthGuard>
           <div className="flex h-screen overflow-hidden">
             <Navigation />
