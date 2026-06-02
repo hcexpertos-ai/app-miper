@@ -389,17 +389,15 @@ function MiperForm({
               </p>
             )}
           </div>
-          {categ === 'seguridad' && (
-            <div>
-              <label className="label">Daño Probable</label>
-              <input
-                className="input"
-                placeholder="Ej: Asma ocupacional, rinitis, fractura"
-                value={form.dano_probable}
-                onChange={e => setForm(s => ({ ...s, dano_probable: e.target.value }))}
-              />
-            </div>
-          )}
+          <div>
+            <label className="label">Daño Probable / Posible Daño a la Salud</label>
+            <input
+              className="input"
+              placeholder="Ej: Asma ocupacional, lumbago, estrés crónico, hipoacusia"
+              value={form.dano_probable}
+              onChange={e => setForm(s => ({ ...s, dano_probable: e.target.value }))}
+            />
+          </div>
         </div>
       </div>
 
@@ -465,32 +463,27 @@ function MiperForm({
             <p className="text-[11px] text-slate-500 mb-3 mt-1">
               {PROTOCOLO_INFO[categ]}
             </p>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="label">Magnitud de la Exposición</label>
-                <input
-                  className="input"
-                  placeholder="Ej: 45 dB(A) / Nivel alto / Resultado protocolo"
-                  value={form.dano_probable}
-                  onChange={e => setForm(s => ({ ...s, dano_probable: e.target.value }))}
-                />
-                <p className="text-[10px] text-slate-400 mt-1">
-                  Registra el valor o resultado obtenido del protocolo de evaluación.
-                </p>
-              </div>
-              <div>
-                <label className="label">Nivel de Riesgo (resultado protocolo)</label>
-                <select
-                  className="select"
-                  value={clasificacion}
-                  onChange={e => handleNivelProtocolo(e.target.value as ClasificacionRiesgo)}
-                >
-                  <option value="tolerable">Tolerable</option>
-                  <option value="moderado">Moderado</option>
-                  <option value="importante">Importante</option>
-                  <option value="intolerable">Intolerable</option>
-                </select>
-              </div>
+            <div className="mt-1">
+              <label className="label">
+                Nivel de Riesgo
+                <span className="ml-1 text-[10px] font-normal text-slate-400">(resultado del protocolo aplicado)</span>
+              </label>
+              <select
+                className="select max-w-xs"
+                value={clasificacion}
+                onChange={e => handleNivelProtocolo(e.target.value as ClasificacionRiesgo)}
+              >
+                <option value="tolerable">Tolerable</option>
+                <option value="moderado">Moderado</option>
+                <option value="importante">Importante</option>
+                <option value="intolerable">Intolerable</option>
+              </select>
+              <p className="text-[10px] text-amber-600 mt-1">
+                ⚠️ Registra aquí el resultado obtenido al aplicar{' '}
+                {categ === 'psicosocial' ? 'el protocolo ISTAS21 / CEAL-SM SUSESO' :
+                 categ === 'higienico'   ? 'el protocolo DS 594 o el correspondiente MINSAL' :
+                                          'el protocolo TMERT-EESS o la Guía MMC'}.
+              </p>
             </div>
             <div className={`mt-3 rounded-xl px-5 py-4 border ${COLOR_RIESGO[clasificacion as ClasificacionRiesgo]}`}>
               <div className="flex items-center gap-4">
