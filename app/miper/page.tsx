@@ -162,7 +162,7 @@ function MiperForm({
 
   const PROTOCOLO_INFO: Record<string, string> = {
     higienico:   'Ingresa el resultado según DS 594/99 o protocolo MINSAL correspondiente.',
-    psicosocial: 'Ingresa el resultado según Protocolo ISTAS21 / SUSESO vigente.',
+    psicosocial: 'Ingresa el resultado según Protocolo CEAL-SM SUSESO vigente.',
     musculo:     'Ingresa el resultado según Protocolo TMERT-EESS o Guía MMC (Ley 20.949).',
   }
 
@@ -332,7 +332,7 @@ function MiperForm({
               {categ !== 'seguridad' && (
                 <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
                   ⚠️ <span className="font-semibold">Debes ingresar tú:</span> el resultado del protocolo (
-                  {categ === 'psicosocial' ? 'ISTAS21 / CEAL-SM' :
+                  {categ === 'psicosocial' ? 'CEAL-SM SUSESO' :
                    categ === 'higienico'   ? 'DS 594 / protocolo MINSAL' :
                                             'TMERT-EESS / Guía MMC'}
                   ) en el campo <strong>Magnitud de Exposición</strong> y seleccionar el <strong>Nivel de Riesgo</strong>.
@@ -418,7 +418,7 @@ function MiperForm({
             : categ === 'higienico'
               ? '2. Evaluación del Riesgo — Higiénico (Magnitud de la Exposición)'
               : categ === 'psicosocial'
-                ? '2. Evaluación del Riesgo — Psicosocial (Protocolo ISTAS21)'
+                ? '2. Evaluación del Riesgo — Psicosocial (Protocolo CEAL-SM SUSESO)'
                 : '2. Evaluación del Riesgo — Músculo Esquelético (TMERT / MMC)'}
         </h3>
 
@@ -490,7 +490,7 @@ function MiperForm({
               </select>
               <p className="text-[10px] text-amber-600 mt-1">
                 ⚠️ Selecciona el resultado obtenido al aplicar{' '}
-                {categ === 'psicosocial' ? 'el protocolo ISTAS21 / CEAL-SM SUSESO' :
+                {categ === 'psicosocial' ? 'el protocolo CEAL-SM SUSESO' :
                  categ === 'higienico'   ? 'el protocolo DS 594 o el correspondiente MINSAL' :
                                           'el protocolo TMERT-EESS o la Guía MMC'}.
               </p>
