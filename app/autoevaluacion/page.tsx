@@ -378,8 +378,8 @@ function PrintView({ respuestas, plan, empresa, centro, fecha }: {
       {/* Firmas */}
       <div className="mt-10 grid grid-cols-2 gap-12">
         {[
-          { titulo: 'Responsable de la Autoevaluación', subtitulo: 'Nombre, cargo y firma' },
-          { titulo: 'Gerente General',                  subtitulo: 'Nombre y firma' },
+          { titulo: 'Evaluador', subtitulo: 'Nombre y firma' },
+          { titulo: 'Representante Legal', subtitulo: 'Nombre y firma' },
         ].map(f => (
           <div key={f.titulo}>
             <div style={{ height: 52 }} />
