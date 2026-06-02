@@ -61,11 +61,13 @@ function scorear(corpus: string, palabras: string[]): { score: number; matches: 
 
 /**
  * Analiza el contexto de una tarea y retorna sugerencias ordenadas
- * por relevancia (top N). Solo incluye reglas que superan su umbral.
+ * por relevancia. Expande cada sugerencia en variantes, una por cada
+ * nivel de jerarquía de control definido (ingeniería, administrativo, EPP…),
+ * para que el usuario pueda elegir entre múltiples opciones.
  */
 export function generarSugerenciasLocales(
   contexto: ContextoTarea,
-  topN = 3,
+  topN = 5,
 ): SugerenciaIA[] {
   const corpus = buildCorpus(contexto)
 
@@ -78,16 +80,35 @@ export function generarSugerenciasLocales(
   const relevantes = scored
     .filter(r => r.score >= REGLAS_MIPER.find(x => x.id === r.reglaId)!.threshold)
     .sort((a, b) => b.score - a.score)
-    .slice(0, topN)
 
-  // Aplanar todas las sugerencias, una por regla relevante (primera sugerencia de cada regla)
-  const sugerencias: SugerenciaIA[] = []
+  // Expandir cada sugerencia en variantes: una por cada medida de control distinta
+  // → el usuario ve "Opción 1: Ingeniería", "Opción 2: Administrativo", etc.
+  const variantes: SugerenciaIA[] = []
+
   for (const r of relevantes) {
-    sugerencias.push(...r.sugerencias)
-    if (sugerencias.length >= topN) break
+    for (const sugerencia of r.sugerencias) {
+      for (const medida of sugerencia.medidasControl) {
+        variantes.push({
+          ...sugerencia,
+          jerarquiaControl: medida.tipoControl as SugerenciaIA['jerarquiaControl'],
+          medidasControl:   [medida],   // una sola medida por variante
+        })
+        if (variantes.length >= topN) break
+      }
+      if (variantes.length >= topN) break
+    }
+    if (variantes.length >= topN) break
   }
 
-  return sugerencias.slice(0, topN)
+  // Si no se alcanzaron topN variantes, completar con sugerencias sin expandir
+  if (variantes.length === 0) {
+    for (const r of relevantes) {
+      variantes.push(...r.sugerencias)
+      if (variantes.length >= topN) break
+    }
+  }
+
+  return variantes.slice(0, topN)
 }
 
 /**

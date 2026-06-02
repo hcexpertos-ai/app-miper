@@ -19,7 +19,7 @@ export interface ResultadoIA {
 
 async function ejecutarLocal(contexto: ContextoTarea): Promise<ResultadoIA> {
   const t0 = Date.now()
-  const sugerencias = generarSugerenciasLocales(contexto, 3)
+  const sugerencias = generarSugerenciasLocales(contexto, 5)
   return {
     sugerencias,
     modo: 'local',
@@ -85,7 +85,7 @@ export function buildPromptExterno(ctx: ContextoTarea): string {
   return `Eres un experto en prevención de riesgos laborales según la normativa chilena
 (DS 44, Ley 16.744, DS 594, Ley Karin 21.643, PREXOR, TMERT, PLANESI, Protocolo Sílice).
 
-Analiza la siguiente tarea y genera hasta 3 sugerencias de riesgo en formato JSON
+Analiza la siguiente tarea y genera hasta 5 sugerencias de riesgo en formato JSON
 con el schema exacto de SugerenciaIA[]. Responde SOLO con el array JSON, sin markdown.
 
 ## Contexto de la tarea
