@@ -1,6 +1,6 @@
 {
-  "name": "App MIPER DS 44",
-  "short_name": "MIPER",
+  "name": "SGSST-DS44",
+  "short_name": "SGSST-DS44",
   "description": "Sistema de gestión de prevención de riesgos laborales",
   "start_url": "/",
   "display": "standalone",
