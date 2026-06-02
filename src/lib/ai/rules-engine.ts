@@ -81,34 +81,21 @@ export function generarSugerenciasLocales(
     .filter(r => r.score >= REGLAS_MIPER.find(x => x.id === r.reglaId)!.threshold)
     .sort((a, b) => b.score - a.score)
 
-  // Expandir cada sugerencia en variantes: una por cada medida de control distinta
-  // → el usuario ve "Opción 1: Ingeniería", "Opción 2: Administrativo", etc.
-  const variantes: SugerenciaIA[] = []
+  // Recolectar sugerencias distintas: diferentes peligro/riesgo/consecuencia.
+  // Se toman todas las sugerencias del bloque más relevante primero, luego
+  // del siguiente hasta completar topN. Cada sugerencia tiene su propio
+  // conjunto completo de mediasControl.
+  const resultado: SugerenciaIA[] = []
 
   for (const r of relevantes) {
-    for (const sugerencia of r.sugerencias) {
-      for (const medida of sugerencia.medidasControl) {
-        variantes.push({
-          ...sugerencia,
-          jerarquiaControl: medida.tipoControl as SugerenciaIA['jerarquiaControl'],
-          medidasControl:   [medida],   // una sola medida por variante
-        })
-        if (variantes.length >= topN) break
-      }
-      if (variantes.length >= topN) break
+    for (const sug of r.sugerencias) {
+      resultado.push(sug)
+      if (resultado.length >= topN) break
     }
-    if (variantes.length >= topN) break
+    if (resultado.length >= topN) break
   }
 
-  // Si no se alcanzaron topN variantes, completar con sugerencias sin expandir
-  if (variantes.length === 0) {
-    for (const r of relevantes) {
-      variantes.push(...r.sugerencias)
-      if (variantes.length >= topN) break
-    }
-  }
-
-  return variantes.slice(0, topN)
+  return resultado.slice(0, topN)
 }
 
 /**
