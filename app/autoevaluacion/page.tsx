@@ -906,8 +906,15 @@ export default function AutoevaluacionPage() {
       <style>{`
         @page { margin: 0; size: A4 portrait; }
         @media print {
-          body > * { display: none !important; }
-          .print-content { display: block !important; }
+          body * { visibility: hidden; }
+          .print-content {
+            display: block !important;
+            visibility: visible;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+          }
+          .print-content * { visibility: visible; }
         }
         @media screen {
           .print-only { display: none; }
