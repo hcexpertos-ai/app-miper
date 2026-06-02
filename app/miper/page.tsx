@@ -770,6 +770,10 @@ export default function MiperPage() {
                           <tbody className="divide-y divide-slate-100">
                             {registros.map(m => (
                               <tr key={m.id} className="hover:bg-slate-50">
+                                {(() => {
+                                  const esSeguridad = categoriaEvaluacion(m.factor_riesgo) === 'seguridad'
+                                  return (
+                                    <>
                                 <td className="table-td font-medium max-w-[140px]">{m.peligro}</td>
                                 <td className="table-td text-slate-500 max-w-[140px]">{m.riesgo}</td>
                                 <td className="table-td text-xs">
@@ -786,20 +790,33 @@ export default function MiperPage() {
                                     (LABEL_FACTOR_RIESGO as Record<string, string>)[m.factor_riesgo] ?? '—'
                                   )}
                                 </td>
+                                {/* Probabilidad: solo para riesgos de Seguridad */}
                                 <td className="table-td whitespace-nowrap text-xs p-1">
-                                  <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md font-semibold
-                                    ${COLOR_PROB[m.probabilidad]?.bg ?? ''} ${COLOR_PROB[m.probabilidad]?.text ?? ''}`}>
-                                    <span className={`w-2 h-2 rounded-full ${COLOR_PROB[m.probabilidad]?.dot ?? ''}`} />
-                                    {LABEL_PROBABILIDAD[m.probabilidad]}
-                                  </span>
+                                  {esSeguridad ? (
+                                    <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md font-semibold
+                                      ${COLOR_PROB[m.probabilidad]?.bg ?? ''} ${COLOR_PROB[m.probabilidad]?.text ?? ''}`}>
+                                      <span className={`w-2 h-2 rounded-full ${COLOR_PROB[m.probabilidad]?.dot ?? ''}`} />
+                                      {LABEL_PROBABILIDAD[m.probabilidad]}
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-300 text-xs">—</span>
+                                  )}
                                 </td>
+                                {/* Consecuencia: solo para riesgos de Seguridad */}
                                 <td className="table-td whitespace-nowrap text-xs p-1">
-                                  <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md font-semibold
-                                    ${COLOR_CONS[m.consecuencia]?.bg ?? ''} ${COLOR_CONS[m.consecuencia]?.text ?? ''}`}>
-                                    <span className={`w-2 h-2 rounded-full ${COLOR_CONS[m.consecuencia]?.dot ?? ''}`} />
-                                    {LABEL_CONSECUENCIA[m.consecuencia]}
-                                  </span>
+                                  {esSeguridad ? (
+                                    <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md font-semibold
+                                      ${COLOR_CONS[m.consecuencia]?.bg ?? ''} ${COLOR_CONS[m.consecuencia]?.text ?? ''}`}>
+                                      <span className={`w-2 h-2 rounded-full ${COLOR_CONS[m.consecuencia]?.dot ?? ''}`} />
+                                      {LABEL_CONSECUENCIA[m.consecuencia]}
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-300 text-xs">—</span>
+                                  )}
                                 </td>
+                                    </>
+                                  )
+                                })()}
                                 <td className="table-td whitespace-nowrap">
                                   <RiesgoBadge
                                     clasificacion={m.clasificacion_riesgo as ClasificacionRiesgo}
