@@ -188,15 +188,23 @@ function MiperForm({
 
   const handleAceptarSugerencia = useCallback(
     async (campos: CamposAceptados, sugerencia: SugerenciaIA) => {
-      // 1. Rellenar formulario con los campos sugeridos
+      // Determinar categoría del factor sugerido
+      const categSugerida = categoriaEvaluacion(campos.factor_riesgo as FactorRiesgoMiper | '')
+      const esSeguridad   = categSugerida === 'seguridad'
+
+      // 1. Rellenar formulario con los campos sugeridos.
+      //    Para riesgos NO de Seguridad (psicosocial, higiénico, músculo-esquelético)
+      //    la magnitud de exposición (dano_probable) y los valores P×C provienen del
+      //    protocolo externo (ISTAS21, TMERT, DS 594), NO de la IA — se dejan vacíos
+      //    para que el usuario los ingrese tras aplicar el protocolo.
       setForm(s => ({
         ...s,
         peligro:             campos.peligro,
         riesgo:              campos.riesgo,
-        dano_probable:       campos.dano_probable,
+        dano_probable:       esSeguridad ? campos.dano_probable : '',
         factor_riesgo:       (campos.factor_riesgo as FactorRiesgoMiper | ''),
-        probabilidad:        campos.probabilidad as Probabilidad,
-        consecuencia:        campos.consecuencia as Consecuencia,
+        probabilidad:        esSeguridad ? campos.probabilidad as Probabilidad : s.probabilidad,
+        consecuencia:        esSeguridad ? campos.consecuencia as Consecuencia : s.consecuencia,
         tipo_control:        campos.tipo_control as TipoControl | '',
         medida_control:      campos.medida_control,
         responsable_control: campos.responsable_control,
@@ -307,13 +315,20 @@ function MiperForm({
 
           {/* Banner de sugerencia aceptada */}
           {sugerenciaAceptada && !showIA && (
-            <div className="mt-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2">
+            <div className="mt-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2 space-y-1">
               <p className="text-xs text-green-700">
-                <span className="font-semibold">✅ {isDuplicate ? 'Nueva medida aplicada desde IA.' : 'Campos completados por IA:'}</span>{' '}
-                {isDuplicate
-                  ? 'Puedes editarla manualmente antes de guardar.'
-                  : 'peligro, riesgo, daño probable, factor de riesgo, probabilidad, consecuencia, tipo de control y medida. Puedes editarlos antes de guardar.'}
+                <span className="font-semibold">✅ IA completó:</span>{' '}
+                peligro, riesgo, factor de riesgo, tipo de control y medida de control.
               </p>
+              {categ !== 'seguridad' && (
+                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                  ⚠️ <span className="font-semibold">Debes ingresar tú:</span> el resultado del protocolo (
+                  {categ === 'psicosocial' ? 'ISTAS21 / CEAL-SM' :
+                   categ === 'higienico'   ? 'DS 594 / protocolo MINSAL' :
+                                            'TMERT-EESS / Guía MMC'}
+                  ) en el campo <strong>Magnitud de Exposición</strong> y seleccionar el <strong>Nivel de Riesgo</strong>.
+                </p>
+              )}
             </div>
           )}
 
