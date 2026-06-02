@@ -440,6 +440,360 @@ export default function PlanRespuestaPage() {
     }
   }
 
+  // ── Word / DOCX export ──────────────────────────────────────────────────────
+  const handleDocx = async () => {
+    if (saving) return
+    setSaving(true)
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const D = await import('docx') as any
+      const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+        AlignmentType, BorderStyle, WidthType, ShadingType, VerticalAlign } = D
+
+      // ── constants ───────────────────────────────────────────────────────────
+      const PW   = 9638           // content width: A4 (11906) - 2×1134 DXA (2 cm each side)
+      const DARK = '1E3A5F'
+      const LGRAY = 'EFF3F7'
+      const brd  = { style: BorderStyle.SINGLE, size: 4, color: 'CCCCCC' }
+      const borders = { top: brd, bottom: brd, left: brd, right: brd }
+      const mar  = { top: 80, bottom: 80, left: 120, right: 120 }
+
+      // ── micro-helpers ────────────────────────────────────────────────────────
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const run = (text: string, o: any = {}) =>
+        new TextRun({ text, font: 'Arial', size: o.size ?? 20, bold: o.bold ?? false,
+          color: o.color, italics: o.italics ?? false })
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const para = (runs: any[], o: any = {}) =>
+        new Paragraph({ children: runs, alignment: o.align,
+          spacing: { before: o.sb ?? 40, after: o.sa ?? 60 }, border: o.border })
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mkCell = (children: any[], o: any = {}) =>
+        new TableCell({ children, borders, margins: mar,
+          width: { size: o.w ?? PW, type: WidthType.DXA },
+          shading: o.bg ? { fill: o.bg, type: ShadingType.CLEAR } : undefined,
+          verticalAlign: o.va ?? VerticalAlign.TOP,
+          columnSpan: o.span })
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mkRow = (...cells: any[]) => new TableRow({ children: cells })
+
+      const heading = (text: string) =>
+        para([run(text, { bold: true, size: 22, color: DARK })],
+          { sb: 240, sa: 120, border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: DARK, space: 4 } } })
+
+      const subheading = (text: string) =>
+        para([run(text, { bold: true, size: 20 })], { sb: 160, sa: 80 })
+
+      const bodyPara = (text: string) =>
+        para([run(text, { size: 18 })], { sb: 40, sa: 60 })
+
+      const twoColTable = (data: [string, string][], ws: [number, number] = [3500, PW - 3500]) =>
+        new Table({
+          width: { size: PW, type: WidthType.DXA }, columnWidths: ws,
+          rows: data.map(([label, val]) => mkRow(
+            mkCell([para([run(label, { bold: true, size: 18 })])], { bg: LGRAY, w: ws[0] }),
+            mkCell([para([run(val || '—', { size: 18 })])],         { w: ws[1] }),
+          ))
+        })
+
+      const spacer = (px = 120) => para([], { sb: px, sa: 0 })
+
+      // ── computed values ──────────────────────────────────────────────────────
+      const activas = EMERGENCIAS.filter(e => cfg.emergencias_activas[e.id] !== false)
+      const total   = ['n_propios','n_contratistas','n_proveedores','n_externos','n_visitas']
+        .reduce((s, k) => s + (parseInt((cfg as any)[k]) || 0), 0)
+      const hw = Math.round(PW / 4)
+
+      // ── 1. Title banner ──────────────────────────────────────────────────────
+      const titleBanner = new Table({
+        width: { size: PW, type: WidthType.DXA }, columnWidths: [PW],
+        rows: [mkRow(mkCell([
+          para([run('PLAN DE RESPUESTA ANTE EMERGENCIAS EN CENTROS DE TRABAJO',
+            { bold: true, size: 24, color: 'FFFFFF' })], { align: AlignmentType.CENTER, sb: 80, sa: 40 }),
+          para([run(empresa?.razon_social || '[NOMBRE ENTIDAD EMPLEADORA]',
+            { size: 22, color: 'FFFFFF' })], { align: AlignmentType.CENTER, sb: 0, sa: 40 }),
+          para([run('DS 44 · Ley N°16.744 · Metodología ACCEDER · SENAPRED',
+            { size: 18, color: 'E0E8F0' })], { align: AlignmentType.CENTER, sb: 0, sa: 80 }),
+        ], { bg: DARK, w: PW }))]
+      })
+
+      // ── 2. Identification table ──────────────────────────────────────────────
+      const idTable = new Table({
+        width: { size: PW, type: WidthType.DXA }, columnWidths: [hw, hw, hw, hw],
+        rows: [
+          mkRow(
+            mkCell([para([run('Código',  { bold: true, size: 18 })])], { bg: LGRAY, w: hw }),
+            mkCell([para([run(cfg.codigo || '—',   { size: 18 })])],  { w: hw }),
+            mkCell([para([run('Revisión',{ bold: true, size: 18 })])], { bg: LGRAY, w: hw }),
+            mkCell([para([run(cfg.revision || '—', { size: 18 })])],  { w: hw }),
+          ),
+          mkRow(
+            mkCell([para([run('Versión', { bold: true, size: 18 })])], { bg: LGRAY, w: hw }),
+            mkCell([para([run(cfg.version || '—',  { size: 18 })])],  { w: hw }),
+            mkCell([para([run('Vigencia',{ bold: true, size: 18 })])], { bg: LGRAY, w: hw }),
+            mkCell([para([run(cfg.vigencia || '—', { size: 18 })])],  { w: hw }),
+          ),
+          mkRow(
+            mkCell([para([run('Elaborado por', { bold: true, size: 18 })])], { bg: LGRAY, w: hw }),
+            mkCell([
+              para([run(cfg.elaborado_por || '—', { size: 18 })]),
+              para([run([cfg.cargo_elaborado, cfg.fecha_elaboracion].filter(Boolean).join(' — '), { size: 16, color: '888888' })]),
+            ], { w: hw }),
+            mkCell([para([run('Revisado por', { bold: true, size: 18 })])], { bg: LGRAY, w: hw }),
+            mkCell([
+              para([run(cfg.revisado_por || '—', { size: 18 })]),
+              para([run([cfg.cargo_revisado, cfg.fecha_revision].filter(Boolean).join(' — '), { size: 16, color: '888888' })]),
+            ], { w: hw }),
+          ),
+          mkRow(
+            mkCell([para([run('Aprobado por', { bold: true, size: 18 })])], { bg: LGRAY, w: hw }),
+            new TableCell({
+              children: [
+                para([run(cfg.aprobado_por || '—', { size: 18 })]),
+                para([run([cfg.cargo_aprobado, cfg.fecha_aprobacion].filter(Boolean).join(' — '), { size: 16, color: '888888' })]),
+              ],
+              width: { size: hw * 3, type: WidthType.DXA },
+              borders, margins: mar, columnSpan: 3,
+            }),
+          ),
+        ]
+      })
+
+      // ── 3. EDE table ─────────────────────────────────────────────────────────
+      const edeW = [Math.round(PW/5), Math.round(PW/5), Math.round(PW/5), Math.round(PW/5), PW - 4*Math.round(PW/5)]
+      const edeTable = cfg.ede.length > 0 ? new Table({
+        width: { size: PW, type: WidthType.DXA }, columnWidths: edeW,
+        rows: [
+          mkRow(...['Titular','Suplente','Área/Sección','Zona Seguridad','N° Personas'].map((h, i) =>
+            mkCell([para([run(h, { bold: true, size: 17, color: 'FFFFFF' })])], { bg: DARK, w: edeW[i] }))),
+          ...cfg.ede.map((r, idx) => mkRow(
+            ...[r.titular, r.suplente, r.area, r.zona_seguridad, r.n_personas].map((v, i) =>
+              mkCell([para([run(v || '—', { size: 17 })])], { bg: idx % 2 ? 'F8F9FA' : 'FFFFFF', w: edeW[i] }))
+          ))
+        ]
+      }) : null
+
+      // ── 4. Installations table ───────────────────────────────────────────────
+      const iw = [Math.round(PW*0.28), Math.round(PW*0.22), Math.round(PW*0.22), PW-Math.round(PW*0.28)-Math.round(PW*0.22)-Math.round(PW*0.22)]
+      const instTable = new Table({
+        width: { size: PW, type: WidthType.DXA }, columnWidths: iw,
+        rows: [
+          mkRow(
+            mkCell([para([run('Nombre Entidad Empleadora', { bold: true, size: 18 })])], { bg: LGRAY, w: iw[0] }),
+            mkCell([para([run(empresa?.razon_social || '—', { size: 18 })])], { w: iw[1] }),
+            mkCell([para([run('RUT', { bold: true, size: 18 })])], { bg: LGRAY, w: iw[2] }),
+            mkCell([para([run(empresa?.rut || '—', { size: 18 })])], { w: iw[3] }),
+          ),
+          mkRow(
+            mkCell([para([run('Nombre Centro de Trabajo', { bold: true, size: 18 })])], { bg: LGRAY, w: iw[0] }),
+            mkCell([para([run(cfg.nombre_centro || '—', { size: 18 })])], { w: iw[1] }),
+            mkCell([para([run('Tipo', { bold: true, size: 18 })])], { bg: LGRAY, w: iw[2] }),
+            mkCell([para([run(cfg.tipo_centro || '—', { size: 18 })])], { w: iw[3] }),
+          ),
+          mkRow(
+            mkCell([para([run('Dirección', { bold: true, size: 18 })])], { bg: LGRAY, w: iw[0] }),
+            new TableCell({
+              children: [para([run([cfg.direccion, cfg.numero, cfg.comuna, cfg.region].filter(Boolean).join(', '), { size: 18 })])],
+              width: { size: PW - iw[0], type: WidthType.DXA }, borders, margins: mar, columnSpan: 3,
+            }),
+          ),
+          mkRow(
+            mkCell([para([run('Entorno', { bold: true, size: 18 })])], { bg: LGRAY, w: iw[0] }),
+            new TableCell({
+              children: [para([run(cfg.descripcion_entorno || '—', { size: 18 })])],
+              width: { size: PW - iw[0], type: WidthType.DXA }, borders, margins: mar, columnSpan: 3,
+            }),
+          ),
+        ]
+      })
+
+      // ── 5. Carga ocupacional table ───────────────────────────────────────────
+      const cw = [Math.round(PW*0.42), Math.round(PW*0.13)]
+      const coTable = new Table({
+        width: { size: cw[0]+cw[1], type: WidthType.DXA }, columnWidths: cw,
+        rows: ([
+          ['Trabajadores propios', cfg.n_propios],
+          ['Contratistas',         cfg.n_contratistas],
+          ['Proveedores',          cfg.n_proveedores],
+          ['Externos / independientes', cfg.n_externos],
+          ['Visitas / clientes / usuarios', cfg.n_visitas],
+          ['Total',                String(total || '—')],
+        ] as [string, string][]).map(([k, v]) => mkRow(
+          mkCell([para([run(k, { bold: k==='Total', size: 18 })])], { bg: LGRAY, w: cw[0] }),
+          mkCell([para([run(v || '—', { bold: k==='Total', size: 18 })])], { w: cw[1] }),
+        ))
+      })
+
+      // ── 6. Emergency procedure blocks ────────────────────────────────────────
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const emergencyBlocks: any[] = []
+      for (const em of activas) {
+        emergencyBlocks.push(
+          new Table({
+            width: { size: PW, type: WidthType.DXA }, columnWidths: [PW],
+            rows: [mkRow(mkCell([para([run(em.nombre, { bold: true, size: 20, color: 'FFFFFF' })])], { bg: DARK, w: PW }))]
+          })
+        )
+        if (em.info_contexto?.length) {
+          emergencyBlocks.push(new Table({
+            width: { size: PW, type: WidthType.DXA }, columnWidths: [PW],
+            rows: [mkRow(mkCell([
+              para([run('Contexto:', { bold: true, size: 18 })]),
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              ...em.info_contexto.map((c: any) => para([run(`• ${c}`, { size: 17 })], { sb: 0, sa: 40 }))
+            ], { bg: 'FFFBEB', w: PW }))]
+          }))
+        }
+        const pw3 = [Math.round(PW/3), Math.round(PW/3), PW - 2*Math.round(PW/3)]
+        emergencyBlocks.push(new Table({
+          width: { size: PW, type: WidthType.DXA }, columnWidths: pw3,
+          rows: [mkRow(
+            mkCell([
+              para([run('Líder de Respuesta (LRC)', { bold: true, size: 17 })], { sa: 60 }),
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              ...em.procedimiento_lrc.map((s: any, i: number) => para([run(`${i+1}. ${s}`, { size: 16 })], { sb: 0, sa: 40 }))
+            ], { bg: 'E8F0FE', w: pw3[0] }),
+            mkCell([
+              para([run('Encargado de Evacuación (EDE)', { bold: true, size: 17 })], { sa: 60 }),
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              ...em.procedimiento_ede.map((s: any, i: number) => para([run(`${i+1}. ${s}`, { size: 16 })], { sb: 0, sa: 40 }))
+            ], { bg: 'E6F4EA', w: pw3[1] }),
+            mkCell([
+              para([run('Personas en General (PG)', { bold: true, size: 17 })], { sa: 60 }),
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              ...em.procedimiento_pg.map((s: any, i: number) => para([run(`${i+1}. ${s}`, { size: 16 })], { sb: 0, sa: 40 }))
+            ], { bg: 'FCE8E6', w: pw3[2] }),
+          )]
+        }))
+        if (cfg.emergencias_notas[em.id]) {
+          emergencyBlocks.push(para([
+            run('Notas del CT: ', { bold: true, size: 17 }),
+            run(cfg.emergencias_notas[em.id], { size: 17, italics: true }),
+          ], { sb: 60, sa: 120 }))
+        }
+        emergencyBlocks.push(spacer())
+      }
+
+      // ── 7. Emergency numbers table ───────────────────────────────────────────
+      const nw = [Math.round(PW*0.5), PW - Math.round(PW*0.5)]
+      const numTable = new Table({
+        width: { size: PW, type: WidthType.DXA }, columnWidths: nw,
+        rows: [
+          mkRow(
+            mkCell([para([run('Organismo', { bold: true, size: 18, color: 'FFFFFF' })])], { bg: DARK, w: nw[0] }),
+            mkCell([para([run('Número',    { bold: true, size: 18, color: 'FFFFFF' })])], { bg: DARK, w: nw[1] }),
+          ),
+          ...([
+            ['Carabineros',        '133'],
+            ['Ambulancia (SAMU)',  '131'],
+            ['Bomberos',           '132'],
+            ['PDI',                '134'],
+            ['ACHS Rescate',       '1404'],
+            ['SENAPRED',           '1960'],
+            ['CITUC (Toxicológica)', '+56 2 2635 3800'],
+            ['CCHEN (Nuclear)',    '+56 2 2364 6100'],
+            ['Min. Salud',         '600 360 777'],
+          ] as [string, string][]).map(([org, num]) => mkRow(
+            mkCell([para([run(org, { size: 18 })])], { w: nw[0] }),
+            mkCell([para([run(num, { bold: true, size: 18 })])], { w: nw[1] }),
+          ))
+        ]
+      })
+
+      // ── 8. Assemble document ─────────────────────────────────────────────────
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const children: any[] = [
+        titleBanner, spacer(160),
+        idTable,     spacer(160),
+
+        heading('Introducción'),
+        bodyPara(`El presente documento establece las medidas y procedimientos de actuación de ${empresa?.razon_social || '[ENTIDAD EMPLEADORA]'} para responder a las situaciones de emergencia o desastre que puedan materializarse en sus centros de trabajo. Está basado en la metodología ACCEDER del SENAPRED y en las guías para la implementación del plan para la reducción del riesgo de desastres en centros de trabajo.`),
+
+        heading('1. Información del Plan'),
+        bodyPara(`Descripción: Conjunto de medios y procedimientos de actuación de ${empresa?.razon_social || '[ENTIDAD EMPLEADORA]'} dirigidos a responder a las potenciales situaciones de emergencia en sus centros de trabajo.`),
+        bodyPara(`Alcance: Este plan aplica al centro de trabajo ${cfg.nombre_centro || '[NOMBRE CENTRO]'} de ${empresa?.razon_social || '[ENTIDAD EMPLEADORA]'}, considerando trabajadores propios, contratistas, clientes y usuarios.`),
+
+        heading('4. Funciones y Responsabilidades'),
+        twoColTable([
+          ['LRC Titular',  cfg.lrc_titular],
+          ['LRC Suplente', cfg.lrc_suplente],
+        ]),
+        ...(cfg.ede.length > 0 && edeTable ? [
+          para([run('Encargados de Evacuación (EDE):', { bold: true, size: 20 })], { sb: 160, sa: 80 }),
+          edeTable,
+        ] : []),
+
+        heading('5. Antecedentes de las Instalaciones'),
+        instTable,
+        para([run('Carga Ocupacional:', { bold: true, size: 20 })], { sb: 160, sa: 80 }),
+        coTable,
+
+        heading('Planificación de la Respuesta — Metodología ACCEDER'),
+        subheading('A — Alerta y Alarma'),
+        twoColTable([
+          ['Encargado de alertas',           cfg.encargado_alerta],
+          ['Cómo se validará la alerta',     cfg.validacion_alerta],
+          ['Acciones al validar la alerta',  cfg.acciones_alerta],
+          ['Encargado de generar la alarma', cfg.encargado_alarma],
+          ['Tipo de alarma',                 cfg.tipo_alarma],
+          ['Cómo se dará la alarma',         cfg.como_alarma],
+        ]),
+        subheading('C — Comunicación'),
+        twoColTable([
+          ['Encargado comunicaciones internas', cfg.encargado_com_interna],
+          ['Encargado comunicaciones externas', cfg.encargado_com_externa],
+        ]),
+        subheading('C — Coordinación — Zonas de Seguridad'),
+        twoColTable([
+          ['Zona de seguridad interna', cfg.zona_seguridad_interna],
+          ['Zona de seguridad externa', cfg.zona_seguridad_externa],
+        ]),
+
+        heading('Procedimientos de Actuación por Amenaza'),
+        para([run(`Amenazas activas: ${activas.map(e => e.nombre).join(', ')}`, { size: 18, color: '666666', italics: true })], { sb: 80, sa: 160 }),
+        ...emergencyBlocks,
+
+        heading('Números de Emergencia'),
+        numTable,
+        spacer(240),
+        para([run(
+          `Documento generado por App MIPER · ${new Date().toLocaleDateString('es-CL')} · Basado en formato tipo ACHS – DS 44 / Ley 16.744`,
+          { size: 16, color: '888888', italics: true }
+        )], { align: AlignmentType.CENTER, sb: 0, sa: 0,
+          border: { top: { style: BorderStyle.SINGLE, size: 4, color: 'CCCCCC', space: 8 } } }),
+      ]
+
+      const doc = new Document({
+        styles: { default: { document: { run: { font: 'Arial', size: 20 } } } },
+        sections: [{
+          properties: {
+            page: {
+              size:   { width: 11906, height: 16838 },
+              margin: { top: 1134, right: 1134, bottom: 1134, left: 1134 },
+            },
+          },
+          children,
+        }],
+      })
+
+      const blob = await Packer.toBlob(doc)
+      const url  = URL.createObjectURL(blob)
+      const a    = document.createElement('a')
+      a.href     = url
+      const nombre = empresa?.razon_social?.replace(/\s+/g, '_') || 'empresa'
+      a.download = `PlanRespuesta_${nombre}_${new Date().toISOString().slice(0, 10)}.docx`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   // ── EDE helpers ─────────────────────────────────────────────────────────────
   const addEde = () => updateField('ede', [...cfg.ede, { titular: '', suplente: '', area: '', zona_seguridad: '', n_personas: '' }])
   const removeEde = (i: number) => updateField('ede', cfg.ede.filter((_, idx) => idx !== i))
@@ -815,13 +1169,20 @@ export default function PlanRespuestaPage() {
           {/* ── Tab: Vista Previa ──────────────────────────────────────────────── */}
           {tab === 'vista_previa' && (
             <div className="max-w-4xl">
-              <div className="flex gap-3 mb-4">
+              <div className="flex gap-3 mb-4 flex-wrap">
+                <button
+                  onClick={handleDocx}
+                  disabled={saving}
+                  className="flex items-center gap-2 bg-[#2563eb] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1d4ed8] disabled:opacity-50 transition-colors"
+                >
+                  {saving ? '⏳ Generando...' : '📄 Descargar Word'}
+                </button>
                 <button
                   onClick={handlePDF}
                   disabled={saving}
                   className="flex items-center gap-2 bg-[#1e3a5f] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#15294a] disabled:opacity-50 transition-colors"
                 >
-                  {saving ? '⏳ Generando...' : '📥 Descargar PDF'}
+                  {saving ? '⏳ Generando...' : '🖼️ Descargar PDF'}
                 </button>
                 <button
                   onClick={handlePrint}
