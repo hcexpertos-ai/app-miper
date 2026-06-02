@@ -131,6 +131,13 @@ function MiperForm({
   const [sugerenciaId,      setSugerenciaId]   = useState<string | null>(null)
   const [sugerenciaAceptada, setSugerenciaAceptada] = useState<SugerenciaIA | null>(null)
   const [showIA,            setShowIA]         = useState(!initial)  // panel abierto en nuevo registro
+  // Para riesgos no-seguridad: rastrear si el usuario ya aplicó el protocolo.
+  // '' = no evaluado aún; valor real = resultado del protocolo seleccionado.
+  const [nivelProtocolo, setNivelProtocolo] = useState<ClasificacionRiesgo | ''>(() => {
+    if (!initial) return ''                   // nuevo registro → pendiente
+    const catInit = categoriaEvaluacion(initial.factor_riesgo)
+    return catInit !== 'seguridad' ? initial.clasificacion_riesgo : ''
+  })
 
   const { mr, clasificacion } = evaluarRiesgo(form.probabilidad, form.consecuencia)
 
@@ -146,8 +153,10 @@ function MiperForm({
     intolerable: { p: 'alta',  c: 'extremadamente_danino' }, // 4×4 = 16 → intolerable
   }
 
-  function handleNivelProtocolo(nivel: ClasificacionRiesgo) {
-    const { p, c } = NIVEL_TO_PC[nivel]
+  function handleNivelProtocolo(valor: string) {
+    setNivelProtocolo(valor as ClasificacionRiesgo | '')
+    if (!valor) return   // "No evaluado aún" — no modificar P×C
+    const { p, c } = NIVEL_TO_PC[valor as ClasificacionRiesgo]
     setForm(s => ({ ...s, probabilidad: p, consecuencia: c }))
   }
 
@@ -470,29 +479,38 @@ function MiperForm({
               </label>
               <select
                 className="select max-w-xs"
-                value={clasificacion}
-                onChange={e => handleNivelProtocolo(e.target.value as ClasificacionRiesgo)}
+                value={nivelProtocolo}
+                onChange={e => handleNivelProtocolo(e.target.value)}
               >
+                <option value="">⏳ No evaluado aún</option>
                 <option value="tolerable">Tolerable</option>
                 <option value="moderado">Moderado</option>
                 <option value="importante">Importante</option>
                 <option value="intolerable">Intolerable</option>
               </select>
               <p className="text-[10px] text-amber-600 mt-1">
-                ⚠️ Registra aquí el resultado obtenido al aplicar{' '}
+                ⚠️ Selecciona el resultado obtenido al aplicar{' '}
                 {categ === 'psicosocial' ? 'el protocolo ISTAS21 / CEAL-SM SUSESO' :
                  categ === 'higienico'   ? 'el protocolo DS 594 o el correspondiente MINSAL' :
                                           'el protocolo TMERT-EESS o la Guía MMC'}.
               </p>
             </div>
-            <div className={`mt-3 rounded-xl px-5 py-4 border ${COLOR_RIESGO[clasificacion as ClasificacionRiesgo]}`}>
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <RiesgoBadge clasificacion={clasificacion as ClasificacionRiesgo} size="md" />
-                  <p className="text-xs mt-1 opacity-80">{ACCION[clasificacion as ClasificacionRiesgo]}</p>
+            {nivelProtocolo ? (
+              <div className={`mt-3 rounded-xl px-5 py-4 border ${COLOR_RIESGO[nivelProtocolo as ClasificacionRiesgo]}`}>
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <RiesgoBadge clasificacion={nivelProtocolo as ClasificacionRiesgo} size="md" />
+                    <p className="text-xs mt-1 opacity-80">{ACCION[nivelProtocolo as ClasificacionRiesgo]}</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="mt-3 rounded-xl px-5 py-4 border border-slate-200 bg-slate-50">
+                <p className="text-sm text-slate-400 text-center">
+                  ⏳ Pendiente de evaluación — aplica el protocolo correspondiente y selecciona el resultado.
+                </p>
+              </div>
+            )}
           </>
         )}
       </div>
