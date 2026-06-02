@@ -781,7 +781,6 @@ export default function AutoevaluacionPage() {
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a]">Brecha / Requisito No Cumplido</th>
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-24">Cuerpo Legal</th>
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-36">Responsable</th>
-                          <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-28">F. Inicio</th>
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-28">F. Compromiso</th>
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-32">Estado</th>
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a]">Observación</th>
@@ -804,14 +803,6 @@ export default function AutoevaluacionPage() {
                                   value={p.responsable}
                                   onChange={e => handlePlanUpdate(item.id, 'responsable', e.target.value)}
                                   placeholder="Nombre responsable"
-                                  className="w-full text-xs border border-slate-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#1e3a5f]"
-                                />
-                              </td>
-                              <td className="px-2 py-1.5 border border-slate-200 align-top">
-                                <input
-                                  type="date"
-                                  value={p.fecha_inicio}
-                                  onChange={e => handlePlanUpdate(item.id, 'fecha_inicio', e.target.value)}
                                   className="w-full text-xs border border-slate-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#1e3a5f]"
                                 />
                               </td>
