@@ -234,8 +234,9 @@ function TablaResultados({ stats, pct }: { stats: SeccionStats[]; pct: number })
 
 // ─── Vista imprimible ─────────────────────────────────────────────────────────
 
-function PrintView({ respuestas, empresa, centro, fecha }: {
+function PrintView({ respuestas, plan, empresa, centro, fecha }: {
   respuestas: Respuestas
+  plan:       Plan
   empresa:    string
   centro:     string
   fecha:      string
@@ -333,6 +334,47 @@ function PrintView({ respuestas, empresa, centro, fecha }: {
         <strong>Nota:</strong> El listado de autoevaluación de cumplimiento de aspectos legales contempla sólo algunos aspectos de la normativa de seguridad y salud en el trabajo, siendo parte del proceso inicial de detección de las brechas existentes. El organismo administrador deberá proporcionar asistencia técnica según resultados de la aplicación.
       </div>
 
+      {/* Plan de Trabajo */}
+      {ITEMS.filter(i => respuestas[i.id] === 'no').length > 0 && (
+        <div className="mt-6">
+          <div className="bg-[#1e3a5f] text-white px-3 py-1.5 font-bold text-[10px] uppercase tracking-wide rounded-t">
+            Plan de Trabajo — Cierre de Brechas
+          </div>
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-slate-100">
+                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-6">N°</th>
+                <th className="px-2 py-1 border border-slate-300 text-left text-[9px]">Brecha / Requisito No Cumplido</th>
+                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-24">Cuerpo Legal</th>
+                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-28">Responsable</th>
+                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-20">F. Compromiso</th>
+                <th className="px-2 py-1 border border-slate-300 text-center text-[9px] w-18">Estado</th>
+                <th className="px-2 py-1 border border-slate-300 text-left text-[9px]">Observación</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ITEMS.filter(i => respuestas[i.id] === 'no').map((item, idx) => {
+                const p  = plan[item.id] ?? PLAN_DEFAULT
+                const bg = idx % 2 === 0 ? '' : 'bg-slate-50/50'
+                return (
+                  <tr key={item.id} className={bg}>
+                    <td className="px-2 py-1.5 border border-slate-200 font-bold text-center text-[#1e3a5f] align-top">{item.id}</td>
+                    <td className="px-2 py-1.5 border border-slate-200 leading-snug align-top text-[9px]">{item.descripcion}</td>
+                    <td className="px-2 py-1.5 border border-slate-200 text-[9px] text-slate-500 align-top">{item.cuerpo_legal}</td>
+                    <td className="px-2 py-1.5 border border-slate-200 text-[9px] align-top">{p.responsable || '—'}</td>
+                    <td className="px-2 py-1.5 border border-slate-200 text-[9px] align-top">
+                      {p.fecha_compromiso ? new Date(p.fecha_compromiso + 'T00:00:00').toLocaleDateString('es-CL') : '—'}
+                    </td>
+                    <td className="px-2 py-1.5 border border-slate-200 text-[9px] text-center align-top">{PLAN_ESTADO_LABEL[p.estado]}</td>
+                    <td className="px-2 py-1.5 border border-slate-200 text-[9px] align-top">{p.observacion || '—'}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {/* Firmas */}
       <div className="mt-10 grid grid-cols-2 gap-12">
         {[
@@ -340,7 +382,6 @@ function PrintView({ respuestas, empresa, centro, fecha }: {
           { titulo: 'Gerente General',                  subtitulo: 'Nombre y firma' },
         ].map(f => (
           <div key={f.titulo}>
-            {/* Espacio para firma */}
             <div style={{ height: 52 }} />
             <div className="border-t-2 border-slate-500 pt-2">
               <p className="text-[10px] font-bold text-slate-700 text-center">{f.titulo}</p>
@@ -488,6 +529,7 @@ export default function AutoevaluacionPage() {
       <div ref={printRef} style={{ display: 'none' }} className="print-content">
         <PrintView
           respuestas={respuestas}
+          plan={plan}
           empresa={empresa?.razon_social ?? ''}
           centro={centro?.nombre ?? ''}
           fecha={fechaEval}
