@@ -262,16 +262,15 @@ function MiperForm({
       setErr('El peligro y el riesgo son obligatorios.')
       return
     }
-    // Para riesgos no-seguridad: si el nivel queda sin evaluar (MR=1),
-    // asegurarse de que el form refleje el estado "no evaluado" correctamente.
-    // Si el usuario dejó nivelProtocolo vacío, forzar a baja×ligeramente_danino (MR=1).
-    if (categ !== 'seguridad' && !nivelProtocolo) {
-      setForm(s => ({ ...s, probabilidad: 'baja', consecuencia: 'ligeramente_danino' }))
-    }
     setGuardando(true)
     setErr('')
+    // Para riesgos no-seguridad sin protocolo evaluado → forzar MR=1 (marcador "no evaluado").
+    // Se construye directamente sobre form para no depender del estado asíncrono de setForm.
+    const baseForm = (categ !== 'seguridad' && !nivelProtocolo)
+      ? { ...form, probabilidad: 'baja' as Probabilidad, consecuencia: 'ligeramente_danino' as Consecuencia }
+      : form
     // Convertir plazo_control vacío a null para evitar error de tipo DATE en la DB
-    const formData = { ...form, plazo_control: form.plazo_control || null }
+    const formData = { ...baseForm, plazo_control: baseForm.plazo_control || null }
     try {
       if (initial && !isDuplicate) {
         await updateMiper(initial.id, formData)
