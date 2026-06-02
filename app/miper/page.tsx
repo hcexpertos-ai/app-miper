@@ -500,7 +500,11 @@ function MiperForm({
             <select
               className="select"
               value={form.tipo_control}
-              onChange={e => setForm(s => ({ ...s, tipo_control: e.target.value as TipoControl | '' }))}
+              onChange={e => setForm(s => ({
+                ...s,
+                tipo_control:    e.target.value as TipoControl | '',
+                medida_control:  '',   // limpiar para que el usuario ingrese la medida del nuevo tipo
+              }))}
             >
               <option value="">Seleccionar...</option>
               {(Object.entries(LABEL_CONTROL) as [TipoControl, string][]).map(([v, l]) => (
