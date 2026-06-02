@@ -487,9 +487,6 @@ function InformeMiper() {
                     {/* Identificación peligros */}
                     <TD cls="max-w-[130px]">
                       <div className="font-medium text-slate-800">{m.peligro}</div>
-                      {m.dano_probable && (
-                        <div className="text-[9px] text-slate-400 mt-0.5">{m.dano_probable}</div>
-                      )}
                     </TD>
                     {/* Factores de Riesgos */}
                     <TD cls="max-w-[100px]">

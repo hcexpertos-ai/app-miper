@@ -411,6 +411,13 @@ export default function AutoevaluacionPage() {
     }
   }
 
+  // ── Limpiar todo ────────────────────────────────────────────────────────
+  const handleLimpiar = () => {
+    if (!confirm('¿Deseas limpiar todas las respuestas de la Autoevaluación? Esta acción no se puede deshacer.')) return
+    setRespuestas({})
+    try { localStorage.removeItem(lsKey) } catch { /* noop */ }
+  }
+
   // ── Imprimir ────────────────────────────────────────────────────────────
   const handlePrint = () => window.print()
 
@@ -516,6 +523,12 @@ export default function AutoevaluacionPage() {
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
               >
                 📥 PDF
+              </button>
+              <button
+                onClick={handleLimpiar}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-colors"
+              >
+                🗑️ Limpiar
               </button>
             </div>
           </div>

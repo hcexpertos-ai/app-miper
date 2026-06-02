@@ -265,7 +265,7 @@ export const COLOR_ESTADO: Record<EstadoPrograma, string> = {
 
 export type ModalidadIrl     = 'presencial' | 'elearning'
 export type TipoActividadIrl = 'interna' | 'externa'
-export type MotivoIrl        = 'nuevo' | 'transferido' | 'ausencia_prolongada'
+export type MotivoIrl        = 'nuevo' | 'transferido' | 'ausencia_prolongada' | 'reinstruccion'
 
 export interface MaterialAdjunto {
   nombre: string
@@ -333,6 +333,7 @@ export const LABEL_MOTIVO_IRL: Record<MotivoIrl, string> = {
   nuevo:               'Trabajador Nuevo',
   transferido:         'Trabajador Transferido',
   ausencia_prolongada: 'Ausencia Prolongada',
+  reinstruccion:       'Reinstrucción',
 }
 
 export const LABEL_MODALIDAD_IRL: Record<ModalidadIrl, string> = {

@@ -70,7 +70,7 @@ function PrintView({ cfg, empresa, centro }: { cfg: ConfigPlan; empresa: any; ce
   const activas = EMERGENCIAS.filter(e => cfg.emergencias_activas[e.id] !== false)
 
   return (
-    <div id="plan-print" style={{ fontFamily: 'Arial, sans-serif', fontSize: 11, lineHeight: 1.45, color: '#111', maxWidth: 820, margin: '0 auto', padding: '1.5cm 2cm' }}>
+    <div style={{ fontFamily: 'Arial, sans-serif', fontSize: 11, lineHeight: 1.45, color: '#111', maxWidth: 820, margin: '0 auto', padding: '1.5cm 2cm' }}>
       {/* ── Encabezado: franja azul con logo (logo blanco visible sobre fondo oscuro) ── */}
       <div style={{ background: '#1e3a5f', color: '#fff', display: 'flex', alignItems: 'center', gap: 16, padding: '12px 20px', marginBottom: 20 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -352,6 +352,7 @@ export default function PlanRespuestaPage() {
   const [cfg, setCfg] = useState<ConfigPlan>(CONFIG_PLAN_DEFAULT)
   const [expandedEm, setExpandedEm] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [guardadoOk, setGuardadoOk] = useState(false)
   const printRef = useRef<HTMLDivElement>(null)
 
   const lsKey = `plan_respuesta_${empresa?.id ?? 'default'}`
@@ -397,17 +398,29 @@ export default function PlanRespuestaPage() {
     update({ [key]: val } as Partial<ConfigPlan>)
   }, [update])
 
+  // ── Guardar manual ──────────────────────────────────────────────────────────
+  const handleGuardar = () => {
+    try {
+      localStorage.setItem(lsKey, JSON.stringify(cfg))
+      setGuardadoOk(true)
+      setTimeout(() => setGuardadoOk(false), 2000)
+    } catch { /* noop */ }
+  }
+
   // ── Print ───────────────────────────────────────────────────────────────────
   const handlePrint = () => window.print()
 
   const handlePDF = async () => {
+    if (!printRef.current) return
     setSaving(true)
     try {
       const html2canvas = (await import('html2canvas')).default
       const jsPDF = (await import('jspdf')).default
-      const el = document.getElementById('plan-print')
-      if (!el) return
-      const canvas = await html2canvas(el, { scale: 1.5, useCORS: true })
+      // Mostrar el target temporalmente para que html2canvas lo capture
+      printRef.current.style.display = 'block'
+      await new Promise(r => setTimeout(r, 150))
+      const canvas = await html2canvas(printRef.current, { scale: 1.5, useCORS: true, backgroundColor: '#ffffff' })
+      printRef.current.style.display = 'none'
       const imgData = canvas.toDataURL('image/jpeg', 0.85)
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
       const pageW = pdf.internal.pageSize.getWidth()
@@ -484,6 +497,16 @@ export default function PlanRespuestaPage() {
                 {empresa?.razon_social || 'Sin empresa'} · Metodología ACCEDER · SENAPRED / DS 44 / Ley 16.744
               </p>
             </div>
+            <button
+              onClick={handleGuardar}
+              className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                guardadoOk
+                  ? 'bg-green-50 text-green-700 border border-green-300'
+                  : 'bg-[#1e3a5f] text-white hover:bg-[#15294a]'
+              }`}
+            >
+              {guardadoOk ? '✅ Guardado' : '💾 Guardar'}
+            </button>
           </div>
 
           {/* Tabs */}
@@ -817,8 +840,8 @@ export default function PlanRespuestaPage() {
         </div>
       </div>
 
-      {/* Print target (hidden on screen) */}
-      <div ref={printRef}>
+      {/* Print target (hidden on screen, shown during print/PDF) */}
+      <div id="plan-print" ref={printRef}>
         <PrintView cfg={cfg} empresa={empresa} centro={centro} />
       </div>
     </>

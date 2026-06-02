@@ -99,12 +99,14 @@ function MiperForm({
   tarea,
   proceso,
   initial,
+  isDuplicate,
   onClose,
 }: {
-  tarea:    Tarea
-  proceso:  Proceso | undefined
-  initial?: MiperRegistro
-  onClose:  () => void
+  tarea:        Tarea
+  proceso:      Proceso | undefined
+  initial?:     MiperRegistro
+  isDuplicate?: boolean
+  onClose:      () => void
 }) {
   const { addMiper, updateMiper, empresa, centro } = useAppStore()
 
@@ -242,7 +244,7 @@ function MiperForm({
     setGuardando(true)
     setErr('')
     try {
-      if (initial) {
+      if (initial && !isDuplicate) {
         await updateMiper(initial.id, form)
       } else {
         const saved = await addMiper(form)
@@ -582,11 +584,12 @@ export default function MiperPage() {
     error, limpiarError,
   } = useAppStore()
 
-  const [procesoId,   setProcesoId]   = useState<string>('')
-  const [showModal,   setShowModal]   = useState(false)
-  const [editMiper,   setEditMiper]   = useState<MiperRegistro | undefined>()
-  const [tareaActual, setTareaActual] = useState<Tarea | undefined>()
-  const [expandidos,  setExpandidos]  = useState<Set<string>>(new Set())
+  const [procesoId,    setProcesoId]    = useState<string>('')
+  const [showModal,    setShowModal]    = useState(false)
+  const [editMiper,    setEditMiper]    = useState<MiperRegistro | undefined>()
+  const [isDuplicate,  setIsDuplicate]  = useState(false)
+  const [tareaActual,  setTareaActual]  = useState<Tarea | undefined>()
+  const [expandidos,   setExpandidos]   = useState<Set<string>>(new Set())
 
   if (!mounted) return (
     <div className="p-6 animate-pulse">
@@ -606,18 +609,28 @@ export default function MiperPage() {
   function openAdd(tarea: Tarea) {
     setTareaActual(tarea)
     setEditMiper(undefined)
+    setIsDuplicate(false)
     setShowModal(true)
   }
 
   function openEdit(miper: MiperRegistro, tarea: Tarea) {
     setTareaActual(tarea)
     setEditMiper(miper)
+    setIsDuplicate(false)
+    setShowModal(true)
+  }
+
+  function openDuplicate(miper: MiperRegistro, tarea: Tarea) {
+    setTareaActual(tarea)
+    setEditMiper(miper)
+    setIsDuplicate(true)
     setShowModal(true)
   }
 
   function closeModal() {
     setShowModal(false)
     setEditMiper(undefined)
+    setIsDuplicate(false)
   }
 
   return (
@@ -770,6 +783,13 @@ export default function MiperPage() {
                                       Editar
                                     </button>
                                     <button
+                                      onClick={() => openDuplicate(m, tarea)}
+                                      className="btn-secondary text-xs px-2 py-1"
+                                      title="Duplicar registro"
+                                    >
+                                      📋
+                                    </button>
+                                    <button
                                       onClick={() => {
                                         if (confirm('¿Eliminar este registro?')) removeMiper(m.id)
                                       }}
@@ -795,7 +815,7 @@ export default function MiperPage() {
 
       {showModal && tareaActual && (
         <Modal
-          title={editMiper ? 'Editar Registro MIPER' : 'Nuevo Registro MIPER'}
+          title={isDuplicate ? 'Duplicar Registro MIPER' : editMiper ? 'Editar Registro MIPER' : 'Nuevo Registro MIPER'}
           onClose={closeModal}
           size="xl"
         >
@@ -803,6 +823,7 @@ export default function MiperPage() {
             tarea={tareaActual}
             proceso={procesoByTarea(tareaActual.id)}
             initial={editMiper}
+            isDuplicate={isDuplicate}
             onClose={closeModal}
           />
         </Modal>

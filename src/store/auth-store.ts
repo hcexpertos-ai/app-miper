@@ -27,15 +27,15 @@ export const useAuthStore = create<AuthState>()((set) => ({
       const result = await Promise.race([
         supabase.auth.getSession(),
         new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('timeout')), 6000)
+          setTimeout(() => reject(new Error('timeout')), 3000)
         ),
       ]) as Awaited<ReturnType<typeof supabase.auth.getSession>>
 
       set({ user: result.data.session?.user ?? null, loading: false })
     } catch {
-      // Timeout o error — limpiar sesión y mostrar login
-      await supabase.auth.signOut().catch(() => {})
+      // Timeout o error — limpiar sesión y mostrar login (sin await para no bloquear)
       set({ user: null, loading: false })
+      supabase.auth.signOut().catch(() => {})
     }
 
     // Escuchar cambios de sesión (login/logout desde otra pestaña o dispositivo)

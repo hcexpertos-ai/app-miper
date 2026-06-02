@@ -1,12 +1,15 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useAuthStore } from '../src/store/auth-store'
 import { useAppStore }  from '../src/store/app-store'
 
+// Detecta si la app corre en GitHub Pages para usar window.location en vez del router
+const isGithubPages = typeof window !== 'undefined' &&
+  window.location.hostname.endsWith('.github.io')
+
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  const router     = useRouter()
   const pathname   = usePathname()
   const user       = useAuthStore(s => s.user)
   const authLoading = useAuthStore(s => s.loading)
@@ -21,7 +24,15 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     if (authLoading) return
 
     if (!user) {
-      if (pathname !== '/auth') router.replace('/auth')
+      if (pathname !== '/auth') {
+        if (isGithubPages) {
+          // En GitHub Pages usamos recarga directa para evitar problemas con el router
+          const base = window.location.pathname.replace(/\/[^/]*\/?$/, '')
+          window.location.replace(base + '/auth/')
+        } else {
+          window.location.replace('/auth')
+        }
+      }
       return
     }
 
@@ -29,7 +40,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     if (pathname !== '/auth') {
       inicializar()
     }
-  }, [user, authLoading, pathname, router, inicializar])
+  }, [user, authLoading, pathname, inicializar])
 
   // Splash mientras verifica sesión
   if (authLoading) {
