@@ -251,7 +251,7 @@ function PrintView({ respuestas, empresa, centro, fecha }: {
   }
 
   return (
-    <div className="font-sans text-[11px] text-slate-800 bg-white" style={{ padding: '1.5cm 2cm', maxWidth: 820 }}>
+    <div className="font-sans text-[11px] text-slate-800 bg-white" style={{ padding: '0.6cm 0.8cm', width: 820 }}>
       {/* ── Encabezado: franja azul con logo (logo blanco visible sobre fondo oscuro) ── */}
       <div style={{ background: '#1e3a5f', color: '#fff', display: 'flex', alignItems: 'center', gap: 16, padding: '12px 20px', marginBottom: 14 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -430,14 +430,16 @@ export default function AutoevaluacionPage() {
       import('jspdf') as any,
     ])
 
-    // Mostrar el área de impresión temporalmente
+    // Mostrar el área de impresión temporalmente con ancho fijo
     printRef.current.style.display = 'block'
-    await new Promise(r => setTimeout(r, 100))
+    printRef.current.style.width   = '820px'
+    await new Promise(r => setTimeout(r, 150))
 
     const canvas = await html2canvas(printRef.current, {
-      scale: 1.5, useCORS: true, backgroundColor: '#ffffff',
+      scale: 2, useCORS: true, backgroundColor: '#ffffff', width: 820,
     })
     printRef.current.style.display = 'none'
+    printRef.current.style.width   = ''
 
     const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' })
     const pdfW = pdf.internal.pageSize.getWidth()

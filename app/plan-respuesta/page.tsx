@@ -416,11 +416,13 @@ export default function PlanRespuestaPage() {
     try {
       const html2canvas = (await import('html2canvas')).default
       const jsPDF = (await import('jspdf')).default
-      // Mostrar el target temporalmente para que html2canvas lo capture
+      // Mostrar el target temporalmente con ancho fijo para que html2canvas lo capture correctamente
       printRef.current.style.display = 'block'
+      printRef.current.style.width   = '820px'
       await new Promise(r => setTimeout(r, 150))
-      const canvas = await html2canvas(printRef.current, { scale: 1.5, useCORS: true, backgroundColor: '#ffffff' })
+      const canvas = await html2canvas(printRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff', width: 820 })
       printRef.current.style.display = 'none'
+      printRef.current.style.width   = ''
       const imgData = canvas.toDataURL('image/jpeg', 0.85)
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
       const pageW = pdf.internal.pageSize.getWidth()

@@ -183,9 +183,11 @@ export default function RiohsPage() {
       import('jspdf') as any,
     ])
     printRef.current.style.display = 'block'
+    printRef.current.style.width   = '820px'
     await new Promise(r => setTimeout(r, 200))
-    const canvas = await html2canvas(printRef.current, { scale: 1.5, useCORS: true, backgroundColor: '#ffffff' })
+    const canvas = await html2canvas(printRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff', width: 820 })
     printRef.current.style.display = 'none'
+    printRef.current.style.width   = ''
     const pdf  = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' })
     const pdfW = pdf.internal.pageSize.getWidth()
     const pdfH = pdf.internal.pageSize.getHeight()
