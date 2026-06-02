@@ -13,7 +13,7 @@ const NAV = [
   { href: '/programa',        icon: '📅', label: 'Prog. de Trabajo' },
   { href: '/irl',             icon: '🔔', label: 'IRL'              },
   { href: '/pts',             icon: '📋', label: 'PTS'              },
-  { href: '/plan-respuesta',  icon: '🚨', label: 'Plan Emergencia'  },
+  { href: '/plan-respuesta',  icon: '🚨', label: 'P.R. Emergencias'  },
   { href: '/fuf',             icon: '🔍', label: 'FUF DS44'         },
   { href: '/informes',        icon: '📄', label: 'Informes'        },
 ]
