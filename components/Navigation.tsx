@@ -39,7 +39,7 @@ export default function Navigation() {
         {/* Logo */}
         <div className="px-5 py-4 border-b border-white/20">
           <Image src="/logo.png" alt="PRSO Logo" width={160} height={80} className="object-contain w-full h-auto mb-2" priority />
-          <div className="text-base font-bold tracking-tight">App MIPER</div>
+          <div className="text-base font-bold tracking-tight">SGSST-DS44</div>
           <div className="text-[11px] text-white/50">DS 44 · Ley 16.744</div>
         </div>
 
