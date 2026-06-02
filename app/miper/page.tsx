@@ -243,11 +243,13 @@ function MiperForm({
     }
     setGuardando(true)
     setErr('')
+    // Convertir plazo_control vacío a null para evitar error de tipo DATE en la DB
+    const formData = { ...form, plazo_control: form.plazo_control || null }
     try {
       if (initial && !isDuplicate) {
-        await updateMiper(initial.id, form)
+        await updateMiper(initial.id, formData)
       } else {
-        const saved = await addMiper(form)
+        const saved = await addMiper(formData)
         // Si hay sugerencia aceptada, actualizarla con el miper_id
         if (sugerenciaId) {
           try {

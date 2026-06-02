@@ -72,7 +72,7 @@ export interface MiperRegistro {
   tipo_control: TipoControl | ''
   medida_control: string
   responsable_control: string
-  plazo_control: string
+  plazo_control: string | null
   esta_controlado: boolean
   fecha_elaboracion: string
 }

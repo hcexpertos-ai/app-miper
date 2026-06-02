@@ -309,7 +309,7 @@ export function exportMiperExcel(
       m.tipo_control ? LABEL_CONTROL[m.tipo_control] : '—',
       m.medida_control,
       m.responsable_control,
-      fmtFecha(m.plazo_control),
+      fmtFecha(m.plazo_control ?? ''),
       m.esta_controlado ? 'Sí' : 'No',
       fmtFecha(m.fecha_elaboracion),
     ])
