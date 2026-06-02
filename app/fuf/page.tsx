@@ -257,7 +257,7 @@ function PrintView({ respuestas, empresa, centro, fecha }: {
   }
 
   return (
-    <div className="print-only font-sans text-[11px] text-slate-800 bg-white" style={{ padding: '1.5cm 2cm', maxWidth: 820 }}>
+    <div className="font-sans text-[11px] text-slate-800 bg-white" style={{ padding: '1.5cm 2cm', maxWidth: 820 }}>
 
       {/* ── Encabezado: franja azul con logo (logo blanco visible sobre fondo oscuro) ── */}
       <div style={{ background: '#1e3a5f', color: '#fff', display: 'flex', alignItems: 'center', gap: 16, padding: '12px 20px', marginBottom: 14 }}>
