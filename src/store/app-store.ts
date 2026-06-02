@@ -107,40 +107,37 @@ export const useAppStore = create<AppStore>()((set, get) => ({
     if (get().inicializado) return
     set({ cargando: true, error: null })
     try {
-      // 1. Empresa (máx 1 por usuario via RLS)
+      // 1. Empresa → Centro (secuencial: cada uno necesita el ID anterior)
       const empresas = await dbEmpresa.getOwn()
       const empresa  = empresas[0] ?? null
-
       if (!empresa) {
         set({ empresa: null, centro: null, inicializado: true, cargando: false })
         return
       }
 
-      // 2. Centro de trabajo (máx 1 por ahora)
       const centros = await dbCentro.getByEmpresa(empresa.id)
       const centro  = centros[0] ?? null
-
       if (!centro) {
         set({ empresa, centro: null, inicializado: true, cargando: false })
         return
       }
 
-      // 3. Fetch cascaded data sequentially (each level depends on previous IDs)
-      const procesos = await dbProceso.getByCentro(centro.id)
+      // 2. Procesos → Tareas (secuencial: tareas necesita procesoIds)
+      const procesos   = await dbProceso.getByCentro(centro.id)
       const procesoIds = procesos.map(p => p.id)
+      const tareas     = await dbTarea.getAllForCentro(procesoIds)
+      const tareaIds   = tareas.map(t => t.id)
 
-      const tareas = await dbTarea.getAllForCentro(procesoIds)
-      const tareaIds = tareas.map(t => t.id)
-      const miperRegistros = await dbMiper.getAllForTareas(tareaIds)
-      const miperIds = miperRegistros.map(m => m.id)
+      // 3. MIPER + IRL + PTS en paralelo (los tres solo necesitan tareaIds)
+      const [miperRegistros, irlRegistros, ptsRegistros] = await Promise.all([
+        dbMiper.getAllForTareas(tareaIds),
+        dbIrl.getByTareaIds(tareaIds).catch(() => [] as IrlRegistro[]),
+        dbPts.getByTareaIds(tareaIds).catch(() => [] as PtsRegistro[]),
+      ])
+
+      // 4. Programa de trabajo (necesita miperIds)
+      const miperIds       = miperRegistros.map(m => m.id)
       const programaTrabajo = await dbPrograma.getByMiperIds(miperIds)
-
-      // IRL y PTS cargan de forma independiente — no bloquean si la tabla aún no existe
-      let irlRegistros: IrlRegistro[] = []
-      try { irlRegistros = await dbIrl.getByTareaIds(tareaIds) } catch { /* tabla pendiente */ }
-
-      let ptsRegistros: PtsRegistro[] = []
-      try { ptsRegistros = await dbPts.getByTareaIds(tareaIds) } catch { /* tabla pendiente */ }
 
       set({
         empresa,
@@ -148,10 +145,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
         procesos,
         tareas,
         miperRegistros,
-        programaTrabajo: programaTrabajo.map(pt => ({
-          ...pt,
-          estado: determinarEstado(pt),
-        })),
+        programaTrabajo: programaTrabajo.map(pt => ({ ...pt, estado: determinarEstado(pt) })),
         irlRegistros,
         ptsRegistros,
         inicializado: true,
