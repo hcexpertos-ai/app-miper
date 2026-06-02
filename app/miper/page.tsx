@@ -286,8 +286,8 @@ function MiperForm({
         )}
       </div>
 
-      {/* ── Panel IA (solo en nuevo registro) ────────────────────────────────── */}
-      {!initial && (
+      {/* ── Panel IA (nuevo registro O duplicado) ───────────────────────────── */}
+      {(!initial || isDuplicate) && (
         <div>
           {/* Toggle del panel */}
           {!showIA && (
@@ -299,7 +299,9 @@ function MiperForm({
               <span>🤖</span>
               {sugerenciaAceptada
                 ? '✅ Sugerencia IA aplicada — ver de nuevo'
-                : 'Usar Asistente IA Preventivo'}
+                : isDuplicate
+                  ? '🤖 Sugerir nueva medida de control con IA'
+                  : 'Usar Asistente IA Preventivo'}
             </button>
           )}
 
@@ -307,9 +309,10 @@ function MiperForm({
           {sugerenciaAceptada && !showIA && (
             <div className="mt-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2">
               <p className="text-xs text-green-700">
-                <span className="font-semibold">✅ Campos completados por IA:</span>{' '}
-                peligro, riesgo, daño probable, factor de riesgo, probabilidad, consecuencia, tipo de control y medida.
-                Puedes editarlos antes de guardar.
+                <span className="font-semibold">✅ {isDuplicate ? 'Nueva medida aplicada desde IA.' : 'Campos completados por IA:'}</span>{' '}
+                {isDuplicate
+                  ? 'Puedes editarla manualmente antes de guardar.'
+                  : 'peligro, riesgo, daño probable, factor de riesgo, probabilidad, consecuencia, tipo de control y medida. Puedes editarlos antes de guardar.'}
               </p>
             </div>
           )}
@@ -515,10 +518,17 @@ function MiperForm({
             />
           </div>
           <div className="md:col-span-2">
-            <label className="label">Medidas de Control</label>
+            <label className="label">
+              Medidas de Control
+              {isDuplicate && (
+                <span className="ml-2 text-[10px] font-normal text-amber-600 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5">
+                  ✏️ Editable — cambia la medida para este registro
+                </span>
+              )}
+            </label>
             <textarea
-              rows={2}
-              className="input resize-none"
+              rows={3}
+              className={`input resize-none ${isDuplicate ? 'border-amber-300 focus:border-amber-500' : ''}`}
               placeholder="Describe la medida de control específica"
               value={form.medida_control}
               onChange={e => setForm(s => ({ ...s, medida_control: e.target.value }))}
