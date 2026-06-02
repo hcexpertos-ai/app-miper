@@ -407,12 +407,12 @@ function PrintView({ respuestas, plan, empresa, centro, fecha }: {
       )}
 
       {/* Firmas */}
-      <div className="mt-10 grid grid-cols-3 gap-6">
-        {['Fiscalizador / Evaluador', 'Representante Legal', 'Prevencionista / DPRC'].map(f => (
+      <div className="mt-10 grid grid-cols-2 gap-12">
+        {['Evaluador', 'Representante Legal'].map(f => (
           <div key={f}>
             <div style={{ height: 52 }} />
             <div className="border-t-2 border-slate-500 pt-2">
-              <p className="text-[9px] font-bold text-slate-700 text-center">{f}</p>
+              <p className="text-[10px] font-bold text-slate-700 text-center">{f}</p>
               <p className="text-[9px] text-slate-400 text-center mt-0.5">Nombre y firma</p>
             </div>
           </div>
