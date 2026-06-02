@@ -387,7 +387,7 @@ export default function LevantamientoPage() {
 
   const {
     empresa, centro, procesos, removeProceso, removeTarea, tareasByProceso,
-    cargando, error, limpiarError,
+    cargando, error, limpiarError, reinicializar,
   } = useAppStore()
 
   const [showEmpresaForm, setShowEmpresaForm] = useState(false)
@@ -430,7 +430,16 @@ export default function LevantamientoPage() {
       {error && (
         <div className="flex items-center justify-between p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
           <span>{error}</span>
-          <button onClick={limpiarError} className="ml-4 text-red-500 hover:text-red-700">✕</button>
+          <div className="flex items-center gap-2 ml-4 shrink-0">
+            <button
+              onClick={() => reinicializar()}
+              disabled={cargando}
+              className="px-3 py-1 rounded-md bg-red-100 hover:bg-red-200 text-red-700 text-xs font-medium transition-colors disabled:opacity-50"
+            >
+              {cargando ? '⏳ Cargando…' : '🔄 Reintentar'}
+            </button>
+            <button onClick={limpiarError} className="text-red-400 hover:text-red-600">✕</button>
+          </div>
         </div>
       )}
 

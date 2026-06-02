@@ -35,8 +35,9 @@ interface State {
 
 interface Actions {
   // Bootstrap
-  inicializar:  () => Promise<void>
-  limpiarError: () => void
+  inicializar:    () => Promise<void>
+  reinicializar:  () => Promise<void>
+  limpiarError:   () => void
 
   // Empresa / Centro
   guardarEmpresa: (e: Omit<Empresa, 'id'> & { id?: string }) => Promise<void>
@@ -100,6 +101,11 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   ...INITIAL,
 
   limpiarError: () => set({ error: null }),
+
+  reinicializar: async () => {
+    set({ inicializado: false, error: null })
+    await get().inicializar()
+  },
 
   // ── Bootstrap ─────────────────────────────────────────────────────────────
 
