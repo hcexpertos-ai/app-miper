@@ -303,7 +303,7 @@ function PrintView({ respuestas, plan, empresa, centro, fecha }: {
               <tr className="bg-slate-100">
                 <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-6">N°</th>
                 <th className="px-2 py-1 border border-slate-300 text-left text-[9px]">Descripción</th>
-                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-32">Cuerpo Legal</th>
+                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-32">Artículo</th>
                 <th className="px-2 py-1 border border-slate-300 text-center text-[9px] w-8">Sí</th>
                 <th className="px-2 py-1 border border-slate-300 text-center text-[9px] w-8">No</th>
                 <th className="px-2 py-1 border border-slate-300 text-center text-[9px] w-8">N/A</th>
@@ -345,10 +345,11 @@ function PrintView({ respuestas, plan, empresa, centro, fecha }: {
               <tr className="bg-slate-100">
                 <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-6">N°</th>
                 <th className="px-2 py-1 border border-slate-300 text-left text-[9px]">Brecha / Requisito No Cumplido</th>
-                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-24">Cuerpo Legal</th>
-                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-28">Responsable</th>
-                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-20">F. Compromiso</th>
-                <th className="px-2 py-1 border border-slate-300 text-center text-[9px] w-18">Estado</th>
+                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-24">Artículo</th>
+                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-24">Responsable</th>
+                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-18">F. Programada</th>
+                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-18">F. Efectiva</th>
+                <th className="px-2 py-1 border border-slate-300 text-center text-[9px] w-16">Estado</th>
                 <th className="px-2 py-1 border border-slate-300 text-left text-[9px]">Observación</th>
               </tr>
             </thead>
@@ -362,6 +363,9 @@ function PrintView({ respuestas, plan, empresa, centro, fecha }: {
                     <td className="px-2 py-1.5 border border-slate-200 leading-snug align-top text-[9px]">{item.descripcion}</td>
                     <td className="px-2 py-1.5 border border-slate-200 text-[9px] text-slate-500 align-top">{item.cuerpo_legal}</td>
                     <td className="px-2 py-1.5 border border-slate-200 text-[9px] align-top">{p.responsable || '—'}</td>
+                    <td className="px-2 py-1.5 border border-slate-200 text-[9px] align-top">
+                      {p.fecha_inicio ? new Date(p.fecha_inicio + 'T00:00:00').toLocaleDateString('es-CL') : '—'}
+                    </td>
                     <td className="px-2 py-1.5 border border-slate-200 text-[9px] align-top">
                       {p.fecha_compromiso ? new Date(p.fecha_compromiso + 'T00:00:00').toLocaleDateString('es-CL') : '—'}
                     </td>
@@ -829,9 +833,10 @@ export default function AutoevaluacionPage() {
                         <tr className="bg-[#1e3a5f] text-white">
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-8">N°</th>
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a]">Brecha / Requisito No Cumplido</th>
-                          <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-24">Cuerpo Legal</th>
+                          <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-24">Artículo</th>
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-36">Responsable</th>
-                          <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-28">F. Compromiso</th>
+                          <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-28">F. Programada</th>
+                          <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-28">F. Efectiva</th>
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-32">Estado</th>
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a]">Observación</th>
                         </tr>
@@ -853,6 +858,14 @@ export default function AutoevaluacionPage() {
                                   value={p.responsable}
                                   onChange={e => handlePlanUpdate(item.id, 'responsable', e.target.value)}
                                   placeholder="Nombre responsable"
+                                  className="w-full text-xs border border-slate-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#1e3a5f]"
+                                />
+                              </td>
+                              <td className="px-2 py-1.5 border border-slate-200 align-top">
+                                <input
+                                  type="date"
+                                  value={p.fecha_inicio}
+                                  onChange={e => handlePlanUpdate(item.id, 'fecha_inicio', e.target.value)}
                                   className="w-full text-xs border border-slate-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#1e3a5f]"
                                 />
                               </td>

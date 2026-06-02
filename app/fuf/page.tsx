@@ -374,8 +374,8 @@ function PrintView({ respuestas, plan, empresa, centro, fecha }: {
                 <th className="px-2 py-1 border border-slate-300 text-left text-[9px]">Brecha / Requisito No Cumplido</th>
                 <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-20">Artículo</th>
                 <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-24">Responsable</th>
-                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-18">F. Inicio</th>
-                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-20">F. Compromiso</th>
+                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-18">F. Programada</th>
+                <th className="px-2 py-1 border border-slate-300 text-left text-[9px] w-20">F. Efectiva</th>
                 <th className="px-2 py-1 border border-slate-300 text-center text-[9px] w-18">Estado</th>
                 <th className="px-2 py-1 border border-slate-300 text-left text-[9px]">Observación</th>
               </tr>
@@ -870,8 +870,8 @@ export default function FufPage() {
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a]">Brecha / Requisito No Cumplido</th>
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-24">Artículo</th>
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-36">Responsable</th>
-                          <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-28">F. Inicio</th>
-                          <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-28">F. Compromiso</th>
+                          <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-28">F. Programada</th>
+                          <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-28">F. Efectiva</th>
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a] w-32">Estado</th>
                           <th className="px-3 py-2 text-left font-semibold border border-[#2a4f7a]">Observación</th>
                         </tr>
