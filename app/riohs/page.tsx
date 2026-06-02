@@ -24,7 +24,7 @@ function renderTexto(texto: string) {
 
 function PrintView({ cfg }: { cfg: RiohsConfig }) {
   return (
-    <div className="print-only font-sans text-[10.5px] text-slate-800 bg-white p-8 max-w-[800px] mx-auto">
+    <div className="font-sans text-[10.5px] text-slate-800 bg-white p-8 max-w-[800px] mx-auto">
       {/* Portada */}
       <div className="text-center mb-8 pb-6 border-b-2 border-[#1e3a5f]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
