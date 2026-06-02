@@ -334,10 +334,18 @@ function PrintView({ respuestas, empresa, centro, fecha }: {
       </div>
 
       {/* Firmas */}
-      <div className="mt-8 grid grid-cols-2 gap-8">
-        {['Elaborado por', 'Revisado por'].map(f => (
-          <div key={f}>
-            <div className="border-t border-slate-400 pt-1 text-[9px] text-slate-500 text-center">{f}</div>
+      <div className="mt-10 grid grid-cols-2 gap-12">
+        {[
+          { titulo: 'Responsable de la Autoevaluación', subtitulo: 'Nombre, cargo y firma' },
+          { titulo: 'Gerente General',                  subtitulo: 'Nombre y firma' },
+        ].map(f => (
+          <div key={f.titulo}>
+            {/* Espacio para firma */}
+            <div style={{ height: 52 }} />
+            <div className="border-t-2 border-slate-500 pt-2">
+              <p className="text-[10px] font-bold text-slate-700 text-center">{f.titulo}</p>
+              <p className="text-[9px] text-slate-400 text-center mt-0.5">{f.subtitulo}</p>
+            </div>
           </div>
         ))}
       </div>
