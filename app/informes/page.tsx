@@ -521,31 +521,31 @@ function InformeMiper() {
                     </TD>
 
                     {/* ── Higiénicos ── */}
-                    <TD cls="text-center font-bold">{esHig ? vep : <span className="text-slate-200">—</span>}</TD>
+                    <TD cls="text-center font-bold">{esHig ? (vep === 1 ? '0' : vep) : <span className="text-slate-200">—</span>}</TD>
                     <TD cls="text-center">
                       {esHig ? (
-                        <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold ${nivelCls}`}>
-                          {nivelTxt}
-                        </span>
+                        vep === 1
+                          ? <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-100 text-slate-500 border border-slate-300">No evaluado</span>
+                          : <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold ${nivelCls}`}>{nivelTxt}</span>
                       ) : ''}</TD>
 
                     {/* ── Psicosociales ── */}
-                    <TD cls="text-center font-bold">{esPsi ? vep : ''}</TD>
+                    <TD cls="text-center font-bold">{esPsi ? (vep === 1 ? '0' : vep) : ''}</TD>
                     <TD cls="text-center">
                       {esPsi ? (
-                        <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold ${nivelCls}`}>
-                          {nivelTxt}
-                        </span>
+                        vep === 1
+                          ? <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-100 text-slate-500 border border-slate-300">No evaluado</span>
+                          : <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold ${nivelCls}`}>{nivelTxt}</span>
                       ) : ''}
                     </TD>
 
                     {/* ── Musculo Esquelético ── */}
-                    <TD cls="text-center font-bold">{esMusc ? vep : ''}</TD>
+                    <TD cls="text-center font-bold">{esMusc ? (vep === 1 ? '0' : vep) : ''}</TD>
                     <TD cls="text-center">
                       {esMusc ? (
-                        <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold ${nivelCls}`}>
-                          {nivelTxt}
-                        </span>
+                        vep === 1
+                          ? <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-100 text-slate-500 border border-slate-300">No evaluado</span>
+                          : <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold ${nivelCls}`}>{nivelTxt}</span>
                       ) : ''}
                     </TD>
 
