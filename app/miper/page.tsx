@@ -148,13 +148,13 @@ function MiperForm({
 
   // Para no-Seguridad: el usuario elige el nivel (resultado de protocolo externo).
   // Mapeamos a P×C equivalente para que la DB genere mr y clasificacion_riesgo correctos.
-  // CONVENCIÓN: baja×ligeramente_danino (MR=1) queda RESERVADO como marcador de "No evaluado aún".
-  //             Tolerable real usa baja×danino (MR=2) → sigue siendo clasificado como TOLERABLE por la DB.
+  // CONVENCIÓN: MR=1 (baja×ligeramente_danino) queda reservado como marcador de "No evaluado aún".
+  //   En la UI se muestra como MR 0. Tolerable real usa baja×danino (MR=2, rango 1-2 = tolerable).
   const NIVEL_TO_PC: Record<ClasificacionRiesgo, { p: Probabilidad; c: Consecuencia }> = {
-    tolerable:   { p: 'baja',  c: 'danino' },                // 1×2 = 2 → tolerable (≠ MR=1 no evaluado)
-    moderado:    { p: 'media', c: 'danino' },                 // 2×2 = 4 → moderado
-    importante:  { p: 'alta',  c: 'danino' },                 // 4×2 = 8 → importante
-    intolerable: { p: 'alta',  c: 'extremadamente_danino' },  // 4×4 = 16 → intolerable
+    tolerable:   { p: 'baja',  c: 'danino' },                // 1×2 = MR 2  → tolerable (rango 1-2)
+    moderado:    { p: 'media', c: 'danino' },                 // 2×2 = MR 4  → moderado
+    importante:  { p: 'alta',  c: 'danino' },                 // 4×2 = MR 8  → importante
+    intolerable: { p: 'alta',  c: 'extremadamente_danino' },  // 4×4 = MR 16 → intolerable
   }
 
   function handleNivelProtocolo(valor: string) {
@@ -823,7 +823,7 @@ export default function MiperPage() {
                                 })()}
                                 <td className="table-td whitespace-nowrap">
                                   {categoriaEvaluacion(m.factor_riesgo) !== 'seguridad' && m.mr === 1
-                                    ? <span className="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-300">⏳ NO EVALUADO</span>
+                                    ? <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-300">MR 0 &nbsp;·&nbsp; NO EVALUADO</span>
                                     : <RiesgoBadge clasificacion={m.clasificacion_riesgo as ClasificacionRiesgo} mr={m.mr} size="sm" />
                                   }
                                 </td>
