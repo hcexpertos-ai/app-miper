@@ -185,13 +185,28 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   guardarEmpresa: async (data) => {
     set({ cargando: true, error: null })
     try {
-      const empresa  = await dbEmpresa.upsert(data)
-      // Actualizar lista de empresas
-      const prev     = get().empresas
-      const lista    = prev.find(e => e.id === empresa.id)
-        ? prev.map(e => e.id === empresa.id ? empresa : e)
-        : [...prev, empresa]
-      set({ empresa, empresas: lista, cargando: false })
+      const empresa    = await dbEmpresa.upsert(data)
+      const prev       = get().empresas
+      const esNueva    = !prev.find(e => e.id === empresa.id)
+      const lista      = esNueva
+        ? [...prev, empresa]
+        : prev.map(e => e.id === empresa.id ? empresa : e)
+
+      if (esNueva) {
+        // Nueva empresa: limpiar todos los datos de la empresa anterior
+        // El centro y los módulos se cargarán vacíos para la nueva empresa
+        try { localStorage.setItem(ACTIVE_EMPRESA_KEY, empresa.id) } catch { /* SSR */ }
+        set({
+          empresa, empresas: lista,
+          centro: null, procesos: [], tareas: [],
+          miperRegistros: [], programaTrabajo: [],
+          irlRegistros: [], ptsRegistros: [],
+          inicializado: true, cargando: false,
+        })
+      } else {
+        // Edición: solo actualizar datos de la empresa, mantener el resto
+        set({ empresa, empresas: lista, cargando: false })
+      }
     } catch (err) {
       set({ error: (err as Error).message, cargando: false })
       throw err

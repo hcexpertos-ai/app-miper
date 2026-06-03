@@ -18,7 +18,7 @@ function EmpresaForm({
   onSave:         () => void
   onCancel:       () => void
 }) {
-  const { guardarEmpresa, guardarCentro, empresa: empresaActiva } = useAppStore()
+  const { guardarEmpresa, guardarCentro, reinicializar, empresa: empresaActiva } = useAppStore()
 
   const [emp, setEmp] = useState({
     razon_social:        initial?.razon_social        ?? '',
@@ -44,6 +44,7 @@ function EmpresaForm({
     setGuardando(true)
     setErr('')
     try {
+      const esNueva = !initial?.id
       const empData = initial?.id ? { id: initial.id, ...emp } : emp
       await guardarEmpresa(empData)
 
@@ -52,6 +53,11 @@ function EmpresaForm({
         ? { id: initialCentro.id, empresa_id: savedEmpId, ...ctr }
         : { empresa_id: savedEmpId, ...ctr }
       await guardarCentro(ctrData)
+
+      // Si es empresa nueva, recargar desde cero para traer el centro recién creado
+      if (esNueva) {
+        await reinicializar()
+      }
       onSave()
     } catch (e) {
       setErr((e as Error).message)
