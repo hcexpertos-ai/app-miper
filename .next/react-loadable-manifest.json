@@ -1,1 +1,90 @@
-{}
+{
+  "app/autoevaluacion/page.tsx -> html2canvas": {
+    "id": 24457,
+    "files": [
+      "static/chunks/ad2866b8.d16d5df33d15d005.js"
+    ]
+  },
+  "app/autoevaluacion/page.tsx -> jspdf": {
+    "id": 53375,
+    "files": [
+      "static/chunks/2f0b94e8.6522109e181f5356.js",
+      "static/chunks/164f4fb6.f0088e7e5d90275f.js",
+      "static/chunks/102.f5f8c1ec76c97b1d.js"
+    ]
+  },
+  "app/fuf/page.tsx -> html2canvas": {
+    "id": 24457,
+    "files": [
+      "static/chunks/ad2866b8.d16d5df33d15d005.js"
+    ]
+  },
+  "app/fuf/page.tsx -> jspdf": {
+    "id": 53375,
+    "files": [
+      "static/chunks/2f0b94e8.6522109e181f5356.js",
+      "static/chunks/164f4fb6.f0088e7e5d90275f.js",
+      "static/chunks/102.f5f8c1ec76c97b1d.js"
+    ]
+  },
+  "app/plan-respuesta/page.tsx -> docx": {
+    "id": 60432,
+    "files": [
+      "static/chunks/8187f03c-6738bb4e7639bc77.js"
+    ]
+  },
+  "app/plan-respuesta/page.tsx -> html2canvas": {
+    "id": 24457,
+    "files": [
+      "static/chunks/ad2866b8.d16d5df33d15d005.js"
+    ]
+  },
+  "app/plan-respuesta/page.tsx -> jspdf": {
+    "id": 53375,
+    "files": [
+      "static/chunks/2f0b94e8.6522109e181f5356.js",
+      "static/chunks/164f4fb6.f0088e7e5d90275f.js",
+      "static/chunks/102.f5f8c1ec76c97b1d.js"
+    ]
+  },
+  "app/pts/page.tsx -> ./generate-word": {
+    "id": 58374,
+    "files": [
+      "static/chunks/8187f03c-6738bb4e7639bc77.js",
+      "static/chunks/374.6005320689d19556.js"
+    ]
+  },
+  "app/riohs/page.tsx -> html2canvas": {
+    "id": 24457,
+    "files": [
+      "static/chunks/ad2866b8.d16d5df33d15d005.js"
+    ]
+  },
+  "app/riohs/page.tsx -> jspdf": {
+    "id": 53375,
+    "files": [
+      "static/chunks/2f0b94e8.6522109e181f5356.js",
+      "static/chunks/164f4fb6.f0088e7e5d90275f.js",
+      "static/chunks/102.f5f8c1ec76c97b1d.js"
+    ]
+  },
+  "node_modules/jspdf/dist/jspdf.es.min.js -> canvg": {
+    "id": 12396,
+    "files": [
+      "static/chunks/bc98253f.2a86d0955713b458.js",
+      "static/chunks/969.8ee1cee58ac44fb4.js"
+    ]
+  },
+  "node_modules/jspdf/dist/jspdf.es.min.js -> dompurify": {
+    "id": 18848,
+    "files": [
+      "static/chunks/848.b772e4ba9e5ce11b.js"
+    ]
+  },
+  "node_modules/jspdf/dist/jspdf.es.min.js -> html2canvas": {
+    "id": 24457,
+    "files": [
+      "static/chunks/ad2866b8.d16d5df33d15d005.js"
+    ]
+  }
+}

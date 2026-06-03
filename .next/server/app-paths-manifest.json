@@ -1,6 +1,15 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
+  "/auth/page": "app/auth/page.js",
+  "/autoevaluacion/page": "app/autoevaluacion/page.js",
+  "/miper/page": "app/miper/page.js",
+  "/fuf/page": "app/fuf/page.js",
   "/page": "app/page.js",
+  "/informes/page": "app/informes/page.js",
+  "/irl/page": "app/irl/page.js",
   "/levantamiento/page": "app/levantamiento/page.js",
-  "/informes/page": "app/informes/page.js"
+  "/plan-respuesta/page": "app/plan-respuesta/page.js",
+  "/programa/page": "app/programa/page.js",
+  "/pts/page": "app/pts/page.js",
+  "/riohs/page": "app/riohs/page.js"
 }

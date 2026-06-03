@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuthStore } from '../src/store/auth-store'
+import { useAppStore }  from '../src/store/app-store'
 
 const NAV = [
   { href: '/',                icon: '📊', label: 'Dashboard'       },
@@ -16,6 +18,7 @@ const NAV = [
   { href: '/plan-respuesta',  icon: '🚨', label: 'P.R. Emergencias'  },
   { href: '/fuf',             icon: '🔍', label: 'FUF DS44'         },
   { href: '/informes',        icon: '📄', label: 'Informes'        },
+  { href: '/empresas',        icon: '🏢', label: 'Mis Empresas'    },
 ]
 
 export default function Navigation() {
@@ -23,6 +26,13 @@ export default function Navigation() {
   const router  = useRouter()
   const user    = useAuthStore(s => s.user)
   const signOut = useAuthStore(s => s.signOut)
+
+  const empresa      = useAppStore(s => s.empresa)
+  const empresas     = useAppStore(s => s.empresas)
+  const switchEmpresa = useAppStore(s => s.switchEmpresa)
+  const cargando     = useAppStore(s => s.cargando)
+
+  const [showSelector, setShowSelector] = useState(false)
 
   // No mostrar navegación en la pantalla de autenticación
   if (path === '/auth') return null
@@ -41,6 +51,57 @@ export default function Navigation() {
           <Image src="/logo.png" alt="PRSO Logo" width={160} height={80} className="object-contain w-full h-auto mb-2" priority />
           <div className="text-base font-bold tracking-tight">SGSST-DS44</div>
           <div className="text-[11px] text-white/50">DS 44 · Ley 16.744</div>
+        </div>
+
+        {/* Selector de empresa activa */}
+        <div className="px-3 pt-3 pb-1">
+          <div className="relative">
+            <button
+              onClick={() => setShowSelector(v => !v)}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-left transition-colors"
+            >
+              <span className="text-sm">🏢</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-semibold text-white truncate leading-tight">
+                  {empresa?.razon_social ?? 'Sin empresa'}
+                </p>
+                {empresas.length > 1 && (
+                  <p className="text-[9px] text-white/40 leading-tight">{empresas.length} empresas · click para cambiar</p>
+                )}
+              </div>
+              {empresas.length > 1 && <span className="text-white/40 text-xs">{showSelector ? '▴' : '▾'}</span>}
+            </button>
+
+            {/* Dropdown empresas */}
+            {showSelector && empresas.length > 1 && (
+              <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-[#16304f] border border-white/10 rounded-xl shadow-2xl overflow-hidden">
+                {empresas.map(emp => (
+                  <button
+                    key={emp.id}
+                    onClick={async () => {
+                      setShowSelector(false)
+                      if (emp.id !== empresa?.id) await switchEmpresa(emp.id)
+                    }}
+                    disabled={cargando}
+                    className={`w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-white/10 transition-colors text-sm border-b border-white/5 last:border-0 ${
+                      emp.id === empresa?.id ? 'bg-white/10' : ''
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${emp.id === empresa?.id ? 'bg-green-400' : 'bg-white/20'}`} />
+                    <span className="text-white/90 text-[11px] truncate">{emp.razon_social}</span>
+                    {emp.id === empresa?.id && <span className="ml-auto text-green-400 text-[10px]">✓</span>}
+                  </button>
+                ))}
+                <Link
+                  href="/empresas"
+                  onClick={() => setShowSelector(false)}
+                  className="flex items-center gap-2 px-3 py-2 text-[11px] text-white/50 hover:text-white/80 hover:bg-white/5 transition-colors border-t border-white/10"
+                >
+                  <span>⚙️</span> Gestionar empresas
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Links */}

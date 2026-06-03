@@ -17,9 +17,12 @@ function determinarEstado(item: ProgramaTrabajo): EstadoPrograma {
   return new Date() > new Date(item.fecha_ejecucion_programada) ? 'vencido' : 'en_proceso'
 }
 
+const ACTIVE_EMPRESA_KEY = 'sgsst_active_empresa_id'
+
 // ─── State shape ─────────────────────────────────────────────────────────────
 
 interface State {
+  empresas:        Empresa[]
   empresa:         Empresa | null
   centro:          CentroTrabajo | null
   procesos:        Proceso[]
@@ -40,8 +43,10 @@ interface Actions {
   limpiarError:   () => void
 
   // Empresa / Centro
-  guardarEmpresa: (e: Omit<Empresa, 'id'> & { id?: string }) => Promise<void>
-  guardarCentro:  (c: Omit<CentroTrabajo, 'id'> & { id?: string }) => Promise<void>
+  guardarEmpresa:  (e: Omit<Empresa, 'id'> & { id?: string }) => Promise<void>
+  guardarCentro:   (c: Omit<CentroTrabajo, 'id'> & { id?: string }) => Promise<void>
+  switchEmpresa:   (empresaId: string) => Promise<void>
+  deleteEmpresa:   (empresaId: string) => Promise<void>
 
   // Módulo 1
   addProceso:    (p: Omit<Proceso, 'id'>) => Promise<string>
@@ -84,6 +89,7 @@ type AppStore = State & Actions
 // ─── Store ───────────────────────────────────────────────────────────────────
 
 const INITIAL: State = {
+  empresas:        [],
   empresa:         null,
   centro:          null,
   procesos:        [],
@@ -96,6 +102,50 @@ const INITIAL: State = {
   cargando:        false,
   error:           null,
 }
+
+// ─── Helper: cargar todos los datos para una empresa ─────────────────────────
+
+async function cargarDatosEmpresa(
+  empresa: Empresa,
+  empresasList: Empresa[],
+  setter: (s: Partial<State>) => void,
+) {
+  try {
+    localStorage.setItem(ACTIVE_EMPRESA_KEY, empresa.id)
+  } catch { /* silenciar en SSR */ }
+
+  const centros = await dbCentro.getByEmpresa(empresa.id)
+  const centro  = centros[0] ?? null
+  if (!centro) {
+    setter({ empresas: empresasList, empresa, centro: null, procesos: [], tareas: [],
+             miperRegistros: [], programaTrabajo: [], irlRegistros: [], ptsRegistros: [],
+             inicializado: true, cargando: false })
+    return
+  }
+
+  const procesos   = await dbProceso.getByCentro(centro.id)
+  const procesoIds = procesos.map(p => p.id)
+  const tareas     = await dbTarea.getAllForCentro(procesoIds)
+  const tareaIds   = tareas.map(t => t.id)
+
+  const [miperRegistros, irlRegistros, ptsRegistros] = await Promise.all([
+    dbMiper.getAllForTareas(tareaIds),
+    dbIrl.getByTareaIds(tareaIds).catch(() => [] as IrlRegistro[]),
+    dbPts.getByTareaIds(tareaIds).catch(() => [] as PtsRegistro[]),
+  ])
+
+  const miperIds        = miperRegistros.map(m => m.id)
+  const programaTrabajo = await dbPrograma.getByMiperIds(miperIds)
+
+  setter({
+    empresas: empresasList,
+    empresa, centro, procesos, tareas, miperRegistros,
+    programaTrabajo: programaTrabajo.map(pt => ({ ...pt, estado: determinarEstado(pt) })),
+    irlRegistros, ptsRegistros, inicializado: true, cargando: false,
+  })
+}
+
+// ─── Store ────────────────────────────────────────────────────────────────────
 
 export const useAppStore = create<AppStore>()((set, get) => ({
   ...INITIAL,
@@ -113,50 +163,18 @@ export const useAppStore = create<AppStore>()((set, get) => ({
     if (get().inicializado) return
     set({ cargando: true, error: null })
     try {
-      // 1. Empresa → Centro (secuencial: cada uno necesita el ID anterior)
       const empresas = await dbEmpresa.getOwn()
-      const empresa  = empresas[0] ?? null
-      if (!empresa) {
-        set({ empresa: null, centro: null, inicializado: true, cargando: false })
+      if (!empresas.length) {
+        set({ empresas: [], empresa: null, centro: null, inicializado: true, cargando: false })
         return
       }
 
-      const centros = await dbCentro.getByEmpresa(empresa.id)
-      const centro  = centros[0] ?? null
-      if (!centro) {
-        set({ empresa, centro: null, inicializado: true, cargando: false })
-        return
-      }
+      // Restaurar la última empresa activa (o usar la primera)
+      let activeId: string | null = null
+      try { activeId = localStorage.getItem(ACTIVE_EMPRESA_KEY) } catch { /* SSR */ }
+      const empresa = empresas.find(e => e.id === activeId) ?? empresas[0]
 
-      // 2. Procesos → Tareas (secuencial: tareas necesita procesoIds)
-      const procesos   = await dbProceso.getByCentro(centro.id)
-      const procesoIds = procesos.map(p => p.id)
-      const tareas     = await dbTarea.getAllForCentro(procesoIds)
-      const tareaIds   = tareas.map(t => t.id)
-
-      // 3. MIPER + IRL + PTS en paralelo (los tres solo necesitan tareaIds)
-      const [miperRegistros, irlRegistros, ptsRegistros] = await Promise.all([
-        dbMiper.getAllForTareas(tareaIds),
-        dbIrl.getByTareaIds(tareaIds).catch(() => [] as IrlRegistro[]),
-        dbPts.getByTareaIds(tareaIds).catch(() => [] as PtsRegistro[]),
-      ])
-
-      // 4. Programa de trabajo (necesita miperIds)
-      const miperIds       = miperRegistros.map(m => m.id)
-      const programaTrabajo = await dbPrograma.getByMiperIds(miperIds)
-
-      set({
-        empresa,
-        centro,
-        procesos,
-        tareas,
-        miperRegistros,
-        programaTrabajo: programaTrabajo.map(pt => ({ ...pt, estado: determinarEstado(pt) })),
-        irlRegistros,
-        ptsRegistros,
-        inicializado: true,
-        cargando:     false,
-      })
+      await cargarDatosEmpresa(empresa, empresas, (s) => set(s as Partial<State>))
     } catch (err) {
       set({ error: (err as Error).message, cargando: false })
     }
@@ -167,8 +185,48 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   guardarEmpresa: async (data) => {
     set({ cargando: true, error: null })
     try {
-      const empresa = await dbEmpresa.upsert(data)
-      set({ empresa, cargando: false })
+      const empresa  = await dbEmpresa.upsert(data)
+      // Actualizar lista de empresas
+      const prev     = get().empresas
+      const lista    = prev.find(e => e.id === empresa.id)
+        ? prev.map(e => e.id === empresa.id ? empresa : e)
+        : [...prev, empresa]
+      set({ empresa, empresas: lista, cargando: false })
+    } catch (err) {
+      set({ error: (err as Error).message, cargando: false })
+      throw err
+    }
+  },
+
+  switchEmpresa: async (empresaId) => {
+    const { empresas } = get()
+    const empresa = empresas.find(e => e.id === empresaId)
+    if (!empresa) return
+    set({ cargando: true, error: null, inicializado: false })
+    try {
+      await cargarDatosEmpresa(empresa, empresas, (s) => set(s as Partial<State>))
+    } catch (err) {
+      set({ error: (err as Error).message, cargando: false })
+    }
+  },
+
+  deleteEmpresa: async (empresaId) => {
+    set({ cargando: true, error: null })
+    try {
+      await dbEmpresa.delete(empresaId)
+      const lista = get().empresas.filter(e => e.id !== empresaId)
+      // Si era la activa, cambiar a la primera disponible
+      if (get().empresa?.id === empresaId) {
+        if (lista.length > 0) {
+          await cargarDatosEmpresa(lista[0], lista, (s) => set(s as Partial<State>))
+        } else {
+          set({ empresas: [], empresa: null, centro: null, procesos: [], tareas: [],
+                miperRegistros: [], programaTrabajo: [], irlRegistros: [], ptsRegistros: [],
+                inicializado: true, cargando: false })
+        }
+      } else {
+        set({ empresas: lista, cargando: false })
+      }
     } catch (err) {
       set({ error: (err as Error).message, cargando: false })
       throw err

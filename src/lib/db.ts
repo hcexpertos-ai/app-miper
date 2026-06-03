@@ -22,12 +22,15 @@ async function run<T>(query: PromiseLike<{ data: T | null; error: unknown }>): P
 
 export const dbEmpresa = {
   getOwn: () =>
-    run<Empresa[]>(supabase.from('empresas').select('*').limit(1)),
+    run<Empresa[]>(supabase.from('empresas').select('*').order('created_at')),
 
   upsert: (data: Omit<Empresa, 'id'> & { id?: string }) =>
     run<Empresa>(
       supabase.from('empresas').upsert(data).select().single()
     ),
+
+  delete: (id: string) =>
+    run<null>(supabase.from('empresas').delete().eq('id', id)),
 }
 
 // ─── Centros de Trabajo ───────────────────────────────────────────────────────
