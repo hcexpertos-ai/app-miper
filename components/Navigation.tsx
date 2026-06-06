@@ -17,6 +17,7 @@ const NAV = [
   { href: '/pts',             icon: '📋', label: 'PTS'              },
   { href: '/plan-respuesta',  icon: '🚨', label: 'P.R. Emergencias'  },
   { href: '/fuf',             icon: '🔍', label: 'FUF DS44'         },
+  { href: '/inspecciones',    icon: '🚧', label: 'Cond. Inseguras'  },
   { href: '/informes',        icon: '📄', label: 'Informes'        },
   { href: '/empresas',        icon: '🏢', label: 'Mis Empresas'    },
 ]

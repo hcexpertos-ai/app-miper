@@ -345,3 +345,44 @@ export const LABEL_TIPO_ACTIVIDAD_IRL: Record<TipoActividadIrl, string> = {
   interna: 'Interna',
   externa: 'Externa',
 }
+
+// ─── Módulo: Inspección de Condiciones Inseguras ─────────────────────────────
+
+export type EstadoInspeccion = 'pendiente' | 'en_proceso' | 'cerrado'
+
+export interface InspeccionRegistro {
+  id:                    string
+  empresa_id:            string
+  fecha_reporte:         string        // ISO date string
+  nombre_trabajador:     string
+  area_trabajo:          string
+  ubicacion_descripcion: string
+  estado:                EstadoInspeccion
+  peligro:               string
+  riesgo:                string
+  consecuencia:          string
+  medida_control:        string
+  normativa:             string
+  responsable:           string
+  fecha_ejecucion:       string | null
+  observaciones:         string
+  created_at:            string
+}
+
+export const AREAS_TRABAJO = [
+  'Producción', 'Bodega', 'Sala de ventas', 'Despacho',
+  'Administración', 'Patio / Estacionamiento', 'Baños / Vestuarios',
+  'Mantención', 'Comedor / Casino', 'Oficinas', 'Otro',
+] as const
+
+export const ESTADO_INSPECCION_LABEL: Record<EstadoInspeccion, string> = {
+  pendiente:  'Pendiente',
+  en_proceso: 'En Proceso',
+  cerrado:    'Cerrado',
+}
+
+export const ESTADO_INSPECCION_COLOR: Record<EstadoInspeccion, { bg: string; text: string; border: string }> = {
+  pendiente:  { bg: 'bg-red-50',    text: 'text-red-700',    border: 'border-red-300'   },
+  en_proceso: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-300' },
+  cerrado:    { bg: 'bg-green-50',  text: 'text-green-700',  border: 'border-green-300' },
+}
